@@ -1,0 +1,110 @@
+// ==========================================
+// 1. GET 請求：讀取總額、歷史紀錄與多筆公告
+// ==========================================
+function doGet() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  
+  // ----------------------------------------
+  // A. 讀取「帳務紀錄」工作表
+  // ----------------------------------------
+  const sheetLedger = ss.getSheetByName('帳務紀錄');
+  let totalOwed = 0;
+  let history = [];
+  
+  if (sheetLedger) {
+    const dataLedger = sheetLedger.getDataRange().getValues();
+    
+    // 從第 2 列開始讀取（跳過標題列）
+    for (let i = 1; i < dataLedger.length; i++) {
+      const row = dataLedger[i];
+      if (!row[0]) continue; // 跳過日期空白的列
+      
+      const date = Utilities.formatDate(new Date(row[0]), Session.getScriptTimeZone(), "yyyy-MM-dd");
+      const type = row[1];       // '借錢' 或 '還錢'
+      const amount = Number(row[2]) || 0;
+      const note = row[3] || '';
+      
+      // 計算待還總額
+      if (type === '借錢') {
+        totalOwed += amount;
+      } else if (type === '還錢') {
+        totalOwed -= amount;
+      }
+      
+      history.push({ date, type, amount, note });
+    }
+    
+    // 將紀錄倒序排列（讓最新的紀錄排在最前面）
+    history.reverse();
+  }
+
+  // ----------------------------------------
+  // B. 讀取「公告欄」工作表
+  // ----------------------------------------
+  const sheetAnnounce = ss.getSheetByName('公告欄');
+  let announcements = [];
+  
+  if (sheetAnnounce) {
+    const announceData = sheetAnnounce.getDataRange().getValues();
+    
+    // 從第 2 列開始讀取（跳過標題列）
+    for (let j = 1; j < announceData.length; j++) {
+      const [content, status, type] = announceData[j];
+      
+      // 只有當「狀態」為「啟用」且「內容」不為空時才加入清單
+      if (status === '啟用' && content && content.toString().trim() !== '') {
+        announcements.push({
+          content: content.toString().trim(),
+          type: type ? type.toString().trim().toLowerCase() : 'info' // 預設樣式為 info
+        });
+      }
+    }
+  }
+
+  // ----------------------------------------
+  // C. 組裝 JSON 並回傳
+  // ----------------------------------------
+  const result = {
+    totalOwed: totalOwed,
+    announcements: announcements,
+    history: history
+  };
+  
+  return ContentService.createTextOutput(JSON.stringify(result))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+
+// ==========================================
+// 2. POST 請求：寫入新的帳務紀錄
+// ==========================================
+function doPost(e) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    // 指定寫入「帳務紀錄」工作表
+    const sheetLedger = ss.getSheetByName('帳務紀錄');
+    
+    if (!sheetLedger) {
+      throw new Error("找不到『帳務紀錄』工作表，請檢查名稱是否正確。");
+    }
+
+    const data = JSON.parse(e.postData.contents);
+    
+    // 依序寫入：[日期, 類型, 金額, 備註]
+    sheetLedger.appendRow([
+      data.date,
+      data.type,
+      Number(data.amount),
+      data.note || ''
+    ]);
+
+    const response = { status: 'success', message: '紀錄新增成功！' };
+    return ContentService.createTextOutput(JSON.stringify(response))
+      .setMimeType(ContentService.MimeType.JSON);
+
+  } catch (error) {
+    const response = { status: 'error', message: error.toString() };
+    return ContentService.createTextOutput(JSON.stringify(response))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
