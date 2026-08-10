@@ -6,27 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>帳務管理系統</title>
 
-  <!-- ========================================================= -->
-  <!-- 📱 PWA 設定區塊 -->
-  <!-- ========================================================= -->
-  <link rel="manifest" href='data:application/manifest+json,{
-    "name": "帳務管理系統",
-    "short_name": "帳務管理系統",
-    "start_url": ".",
-    "display": "standalone",
-    "background_color": "#121212",
-    "theme_color": "#2563eb",
-    "icons": [{
-      "src": "https://dinhertw.github.io/money/icon.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }]
-  }'>
-
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="帳務管理系統">
-  <link rel="apple-touch-icon" href="https://dinhertw.github.io/money/icon.png">
   <link rel="icon" type="image/png" href="https://dinhertw.github.io/money/icon.png">
   
   <!-- Bootstrap 5.3 CSS & Icons -->
@@ -37,24 +16,24 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <style>
-    /* 🎨 深色模式 (Dark Mode) - 黑灰色調優化 */
+    /* 🎨 深色模式 (Dark Mode) */
     [data-bs-theme="dark"] {
-      --app-bg: #121212;                           /* 主背景：純極深黑灰 */
-      --card-bg: #1e1e1e;                          /* 卡片背景：深灰 */
-      --card-border: #2d2d2d;                      /* 卡片邊框：中暗灰 */
-      --input-bg: #262626;                         /* 輸入框與按鈕：暗灰 */
-      --text-primary: #f1f5f9;                     /* 主要文字：高對比亮白 */
-      --text-secondary: #a1a1aa;                   /* 次要文字：霧灰 */
-      --hero-bg: linear-gradient(135deg, #1f242d 0%, #161a22 100%); /* Hero區塊微漸層 */
+      --app-bg: #121212;
+      --card-bg: #1e1e1e;
+      --card-border: #2d2d2d;
+      --input-bg: #262626;
+      --text-primary: #f1f5f9;
+      --text-secondary: #a1a1aa;
+      --hero-bg: linear-gradient(135deg, #1f242d 0%, #161a22 100%);
       --hero-title: #ffffff;
       --date-picker-filter: invert(0.8);
       --accordion-btn-bg: #1e1e1e;
-      --accordion-btn-active-bg: #2a2a2a;         /* 手風琴展開頭部：亮深灰 */
-      --table-hover-bg: #262626;                   /* 表格懸停：暗灰 */
-      --th-hover-bg: #333333;                      /* 表頭懸停：深灰 */
+      --accordion-btn-active-bg: #2a2a2a;
+      --table-hover-bg: #262626;
+      --th-hover-bg: #333333;
     }
     
-    /* ☀️ 淺色模式 (Light Mode) 顏色變數 */
+    /* ☀️ 淺色模式 (Light Mode) */
     [data-bs-theme="light"] {
       --app-bg: #f8fafc;
       --card-bg: #ffffff;
@@ -70,6 +49,13 @@
       --table-hover-bg: #f8fafc;
       --th-hover-bg: #e2e8f0;
     }
+
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 100%;
+      height: 100%;
+    }
     
     body {
       background-color: var(--app-bg);
@@ -79,6 +65,8 @@
       flex-direction: column;
       font-family: system-ui, -apple-system, sans-serif;
       transition: background-color 0.2s, color 0.2s;
+      padding-top: 1.5rem !important;
+      padding-bottom: 1.5rem !important;
     }
     
     .slate-card {
@@ -139,7 +127,6 @@
     .dropdown-item { color: var(--text-primary) !important; }
     .dropdown-item:hover { background-color: var(--input-bg) !important; }
     
-    /* 📊 表格與手風琴樣式優化 */
     .accordion-item {
       background-color: transparent !important;
       border: 1px solid var(--card-border) !important;
@@ -179,7 +166,6 @@
       user-select: none;
     }
     
-    /* 🟢 可排序表頭樣式 */
     .table-custom th.sortable {
       cursor: pointer;
       transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
@@ -208,8 +194,26 @@
     .table-custom tbody tr:hover {
       background-color: var(--table-hover-bg);
     }
+
+    /* 🖥️ 強制 SweetAlert2 滿版且零邊距 */
+    .swal2-container {
+      padding: 0 !important;
+    }
+
+    .swal2-container .swal-fullscreen-popup {
+      width: 100vw !important;
+      height: 100vh !important;
+      max-width: 100vw !important;
+      max-height: 100vh !important;
+      border-radius: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: center !important;
+      align-items: center !important;
+    }
     
-    /* 📱 RWD 高度處理 */
     @media (min-width: 992px) {
       .history-container {
         max-height: 580px;
@@ -225,20 +229,14 @@
     }
   </style>
 </head>
-<body class="py-4">
+<body>
 
   <div class="container flex-grow-1" style="max-width: 1000px;">
-    
-    <!-- 📢 多個公告動態渲染區域 -->
     <div id="announcementContainer" class="d-flex flex-column gap-2 mb-4"></div>
 
     <div class="row g-4">
-      
-      <!-- 左側：輸入表單與總額 -->
       <div class="col-12 col-lg-5">
         <div class="d-flex flex-column gap-3 sticky-lg-top" style="top: 1.5rem; z-index: 10;">
-          
-          <!-- 待還總額顯示卡片 -->
           <div class="card slate-card hero-card p-3">
             <div class="card-body">
               <div class="d-flex align-items-center gap-2 mb-2">
@@ -249,7 +247,6 @@
             </div>
           </div>
 
-          <!-- 新增紀錄表單 -->
           <div class="card slate-card">
             <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0">
               <h5 class="card-title fw-bold m-0 d-flex align-items-center gap-2">
@@ -259,7 +256,6 @@
             <div class="card-body p-4">
               <form id="ledgerForm">
                 <div class="row g-3">
-                  
                   <div class="col-6">
                     <label for="date" class="form-label small">日期</label>
                     <input type="date" class="form-control rounded-3" id="date" required>
@@ -304,11 +300,9 @@
               </form>
             </div>
           </div>
-
         </div>
       </div>
 
-      <!-- 右側：歷史紀錄清單 (按月分組手風琴 + 表格樣式) -->
       <div class="col-12 col-lg-7">
         <div class="card slate-card">
           <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0 d-flex align-items-center justify-content-between flex-wrap gap-2">
@@ -319,7 +313,6 @@
               <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2.5 py-1 fw-normal small" id="recordCount">0 筆</span>
             </div>
 
-            <!-- 🔄 排序切換按鈕 (月份層級) -->
             <button class="btn btn-sm btn-custom-dropdown rounded-pill px-3 py-1 d-flex align-items-center gap-1.5" onclick="toggleSortOrder()" id="sortBtn">
               <i class="bi bi-sort-down text-primary"></i> <span id="sortLabel">最新月在前</span>
             </button>
@@ -327,7 +320,6 @@
 
           <div class="card-body p-4">
             <div class="history-container">
-              <!-- 按月折疊面板將會渲染在下面這個 accordion 中 -->
               <div class="accordion" id="monthlyHistoryAccordion">
                 <div class="text-center text-sub py-5">載入中...</div>
               </div>
@@ -335,11 +327,9 @@
           </div>
         </div>
       </div>
-
     </div>
   </div>
 
-  <!-- 頁尾：主題選單 -->
   <footer class="mt-auto pt-5 pb-3 text-center small">
     <div class="container">
       <div class="dropdown d-inline-block mb-3">
@@ -353,40 +343,36 @@
           <li><a class="dropdown-item" href="#" onclick="changeTheme('auto'); return false;"><i class="bi bi-display me-2"></i>隨系統切換</a></li>
         </ul>
       </div>
-      <div class="text-sub opacity-75">Copyright © 2026.07 帳務管理系統 by Dinher</div>
+      <div class="text-sub opacity-75">Copyright © 2026.08 帳務管理系統 by Dinher</div>
     </div>
   </footer>
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-<script>
-    // 全局變數
+  <script>
     let API_URL = null;
     let globalHistoryData = [];
-    let currentTotalOwed = 0;      // 記錄當前待還總金額
-    let currentSortOrder = 'desc'; // 月份排序：'desc': 最新月在前, 'asc': 最舊月在前
+    let currentTotalOwed = 0;
+    let currentSortOrder = 'desc';
 
-    // 📊 表格內部欄位排序狀態
-    let tableSortKey = 'date';    // 預設依 'date' 排序
-    let tableSortOrder = 'desc';  // 預設最新日期在前 ('desc' / 'asc')
+    let tableSortKey = 'date';
+    let tableSortOrder = 'desc';
 
-    // 預設日期輸入框為「今天」
     document.getElementById('date').valueAsDate = new Date();
 
-    // ==========================================
-    // 🔗 嚴格網址參數與 JSON 設定檔檢查 (無預設值)
-    // ==========================================
     async function initConfig() {
       const urlParams = new URLSearchParams(window.location.search);
-      const loadConfigParam = urlParams.get('load');
+      let loadConfigParam = urlParams.get('load');
 
-      // ❌ 未提供 ?load= 參數直接拋出錯誤
       if (!loadConfigParam) {
         throw new Error("網址缺少 `?load=???` 設定檔參數。");
       }
 
-      // 組合 JSON URL (例如: https://dinhertw.github.io/money/config.json)
+      if (!loadConfigParam.startsWith('http://') && !loadConfigParam.startsWith('https://') && !loadConfigParam.endsWith('.json')) {
+        loadConfigParam += '.json';
+      }
+
       const baseUrl = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/');
       const jsonUrl = new URL(loadConfigParam, baseUrl).href;
 
@@ -397,33 +383,14 @@
       
       const config = await response.json();
 
-      // ❌ 檢查 JSON 欄位完整性，缺一不可
       if (!config.title || !config.apiUrl) {
         throw new Error("JSON 設定檔格式不完整，需包含 `title` 與 `apiUrl` 欄位。");
       }
 
-      // 套用設定
       document.title = config.title;
       API_URL = config.apiUrl;
     }
 
-
-    // ==========================================
-    // 🚀 PWA Service Worker 註冊
-    // ==========================================
-    if ('serviceWorker' in navigator) {
-      const swCode = `
-        self.addEventListener('install', e => self.skipWaiting());
-        self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));
-      `;
-      const blob = new Blob([swCode], { type: 'text/javascript' });
-      navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
-    }
-
-
-    // ==========================================
-    // 🎨 主題切換邏輯
-    // ==========================================
     const systemThemeMedia = window.matchMedia('(prefers-color-scheme: dark)');
     systemThemeMedia.addEventListener('change', () => {
       if (localStorage.getItem('user-theme') === 'auto') {
@@ -454,11 +421,6 @@
 
     const currentSavedTheme = localStorage.getItem('user-theme') || 'auto';
     applyTheme(currentSavedTheme);
-
-
-    // ==========================================
-    // 🔄 歷史紀錄按月分組與表格渲染 logic
-    // ==========================================
 
     function toggleSortOrder() {
       currentSortOrder = (currentSortOrder === 'desc') ? 'asc' : 'desc';
@@ -637,11 +599,6 @@
       }).join('');
     }
 
-
-    // ==========================================
-    // 🛠️ API 資料串接
-    // ==========================================
-
     function selectType(value, labelHtml) {
       document.getElementById('type').value = value;
       document.getElementById('typeDropdownLabel').innerHTML = labelHtml;
@@ -650,8 +607,8 @@
     function getSwalStyle() {
       const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
       return {
-        background: isDark ? '#1e2330' : '#ffffff',
-        color: isDark ? '#e2e8f0' : '#0f172a'
+        background: isDark ? '#121212' : '#ffffff',
+        color: isDark ? '#f1f5f9' : '#0f172a'
       };
     }
 
@@ -663,7 +620,6 @@
       primary: 'bi-megaphone-fill'
     };
 
-    // 從 Google Sheet 載入資料
     async function loadData(showLoading = true) {
       const swalStyle = getSwalStyle();
 
@@ -673,6 +629,10 @@
           background: swalStyle.background,
           color: swalStyle.color,
           allowOutsideClick: false,
+          heightAuto: false,
+          customClass: {
+            popup: 'swal-fullscreen-popup'
+          },
           didOpen: () => Swal.showLoading()
         });
       }
@@ -714,14 +674,17 @@
             background: swalStyle.background,
             color: swalStyle.color,
             allowOutsideClick: false,
-            showConfirmButton: false
+            showConfirmButton: false,
+            heightAuto: false,
+            customClass: {
+              popup: 'swal-fullscreen-popup'
+            }
           });
         }
         document.getElementById('monthlyHistoryAccordion').innerHTML = `<div class="text-center text-danger py-5">資料載入失敗</div>`;
       }
     }
 
-    // 表單送出處理
     document.getElementById('ledgerForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -789,19 +752,15 @@
       }
     });
 
-    // 🚀 主程式啟動點
     async function startApp() {
       const swalStyle = getSwalStyle();
 
       try {
-        // 1. 讀取與驗證設定檔 (失敗會直接 throw error)
         await initConfig();
-        // 2. 載入資料
         await loadData(true);
       } catch (err) {
         console.error("應用程式初始化失敗:", err.message);
 
-        // 跳出強制錯誤視窗
         Swal.fire({
           icon: 'error',
           title: '系統載入失敗',
@@ -809,10 +768,13 @@
           background: swalStyle.background,
           color: swalStyle.color,
           allowOutsideClick: false,
-          showConfirmButton: false
+          showConfirmButton: false,
+          heightAuto: false,
+          customClass: {
+            popup: 'swal-fullscreen-popup'
+          }
         });
 
-        // 畫面中央顯示錯誤訊息
         document.getElementById('monthlyHistoryAccordion').innerHTML = `
           <div class="text-center text-danger py-5 fw-bold">
             <i class="bi bi-exclamation-octagon fs-1 d-block mb-2"></i>
