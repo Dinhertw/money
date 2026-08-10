@@ -591,16 +591,16 @@
                  aria-labelledby="${headingId}">
               <div class="accordion-body">
                 <div class="table-responsive">
-                  <table class="table table-custom align-middle text-center">
+                  <table class="table table-custom align-middle">
                     <thead>
                       <tr>
-                        <th class="sortable text-nowrap ${tableSortKey === 'date' ? 'active' : ''}" onclick="handleTableSort('date')">
+                        <th class="sortable text-nowrap text-center ${tableSortKey === 'date' ? 'active' : ''}" onclick="handleTableSort('date')">
                           日期 ${getSortIconHtml('date')}
                         </th>
-                        <th class="sortable text-nowrap ${tableSortKey === 'type' ? 'active' : ''}" onclick="handleTableSort('type')">
+                        <th class="sortable text-nowrap text-center ${tableSortKey === 'type' ? 'active' : ''}" onclick="handleTableSort('type')">
                           類型 ${getSortIconHtml('type')}
                         </th>
-                        <th class="sortable text-nowrap ${tableSortKey === 'amount' ? 'active' : ''}" onclick="handleTableSort('amount')">
+                        <th class="sortable text-nowrap text-center ${tableSortKey === 'amount' ? 'active' : ''}" onclick="handleTableSort('amount')">
                           金額 ${getSortIconHtml('amount')}
                         </th>
                         <th style="min-width: 150px;" class="text-sub text-nowrap">備註</th>
