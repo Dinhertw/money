@@ -37,192 +37,192 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <style>
-/* 🎨 深色模式 (Dark Mode) - 黑灰色調優化 */
-[data-bs-theme="dark"] {
-  --app-bg: #121212;                           /* 主背景：純極深黑灰 */
-  --card-bg: #1e1e1e;                          /* 卡片背景：深灰 */
-  --card-border: #2d2d2d;                      /* 卡片邊框：中暗灰 */
-  --input-bg: #262626;                         /* 輸入框與按鈕：暗灰 */
-  --text-primary: #f1f5f9;                     /* 主要文字：高對比亮白 */
-  --text-secondary: #a1a1aa;                   /* 次要文字：霧灰 */
-  --hero-bg: linear-gradient(135deg, #1f242d 0%, #161a22 100%); /* Hero區塊微漸層 */
-  --hero-title: #ffffff;
-  --date-picker-filter: invert(0.8);
-  --accordion-btn-bg: #1e1e1e;
-  --accordion-btn-active-bg: #2a2a2a;         /* 手風琴展開頭部：亮深灰 */
-  --table-hover-bg: #262626;                   /* 表格懸停：暗灰 */
-  --th-hover-bg: #333333;                      /* 表頭懸停：深灰 */
-}
-
-/* ☀️ 淺色模式 (Light Mode) 顏色變數 */
-[data-bs-theme="light"] {
-  --app-bg: #f8fafc;
-  --card-bg: #ffffff;
-  --card-border: #e2e8f0;
-  --input-bg: #f1f5f9;
-  --text-primary: #0f172a;
-  --text-secondary: #334155;
-  --hero-bg: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  --hero-title: #1e3a8a;
-  --date-picker-filter: none;
-  --accordion-btn-bg: #ffffff;
-  --accordion-btn-active-bg: #f1f5f9;
-  --table-hover-bg: #f8fafc;
-  --th-hover-bg: #e2e8f0;
-}
-
-body {
-  background-color: var(--app-bg);
-  color: var(--text-primary);
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  font-family: system-ui, -apple-system, sans-serif;
-  transition: background-color 0.2s, color 0.2s;
-}
-
-.slate-card {
-  background-color: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-}
-
-.hero-card {
-  background: var(--hero-bg);
-  border: 1px solid var(--card-border);
-}
-
-.hero-card .hero-amount {
-  color: var(--hero-title);
-}
-
-.form-label, label, small, .small, .text-sub {
-  color: var(--text-secondary) !important;
-  font-weight: 500;
-}
-
-.form-control, .form-select, .btn-custom-dropdown {
-  background-color: var(--input-bg) !important;
-  border: 1px solid var(--card-border) !important;
-  color: var(--text-primary) !important;
-}
-
-.form-control:focus, .form-select:focus, .btn-custom-dropdown:focus {
-  border-color: #3b82f6 !important;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25) !important;
-}
-
-input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: var(--date-picker-filter);
-  cursor: pointer;
-}
-
-.btn-slate-primary {
-  background-color: #2563eb;
-  border: none;
-  color: #ffffff;
-  font-weight: 600;
-}
-
-.btn-slate-primary:hover {
-  background-color: #1d4ed8;
-  color: #ffffff;
-}
-
-.dropdown-menu {
-  background-color: var(--card-bg) !important;
-  border: 1px solid var(--card-border) !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
-}
-
-.dropdown-item { color: var(--text-primary) !important; }
-.dropdown-item:hover { background-color: var(--input-bg) !important; }
-
-/* 📊 表格與手風琴樣式優化 */
-.accordion-item {
-  background-color: transparent !important;
-  border: 1px solid var(--card-border) !important;
-  border-radius: 12px !important;
-  overflow: hidden;
-  margin-bottom: 0.75rem;
-}
-
-.accordion-button {
-  background-color: var(--accordion-btn-bg) !important;
-  color: var(--text-primary) !important;
-  box-shadow: none !important;
-  padding: 1rem 1.25rem;
-}
-
-.accordion-button:not(.collapsed) {
-  background-color: var(--accordion-btn-active-bg) !important;
-}
-
-.accordion-body {
-  background-color: var(--card-bg) !important;
-  padding: 0;
-}
-
-.table-custom {
-  margin-bottom: 0;
-  color: var(--text-primary) !important;
-}
-
-.table-custom th {
-  background-color: var(--input-bg);
-  color: var(--text-secondary);
-  font-weight: 600;
-  font-size: 0.85rem;
-  border-bottom: 1px solid var(--card-border);
-  padding: 0.75rem 1rem;
-  user-select: none;
-}
-
-/* 🟢 可排序表頭樣式 */
-.table-custom th.sortable {
-  cursor: pointer;
-  transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
-}
-
-.table-custom th.sortable:hover {
-  background-color: var(--th-hover-bg);
-  color: var(--text-primary);
-}
-
-.table-custom th.sortable.active {
-  color: #60a5fa;
-}
-
-.table-custom td {
-  border-bottom: 1px solid var(--card-border);
-  padding: 0.85rem 1rem;
-  vertical-align: middle;
-  font-size: 0.95rem;
-}
-
-.table-custom tr:last-child td {
-  border-bottom: none;
-}
-
-.table-custom tbody tr:hover {
-  background-color: var(--table-hover-bg);
-}
-
-/* 📱 RWD 高度處理 */
-@media (min-width: 992px) {
-  .history-container {
-    max-height: 580px;
-    overflow-y: auto;
-  }
-}
-
-@media (max-width: 991.98px) {
-  .history-container {
-    max-height: none !important;
-    overflow-y: visible !important;
-  }
-}
+    /* 🎨 深色模式 (Dark Mode) - 黑灰色調優化 */
+    [data-bs-theme="dark"] {
+      --app-bg: #121212;                           /* 主背景：純極深黑灰 */
+      --card-bg: #1e1e1e;                          /* 卡片背景：深灰 */
+      --card-border: #2d2d2d;                      /* 卡片邊框：中暗灰 */
+      --input-bg: #262626;                         /* 輸入框與按鈕：暗灰 */
+      --text-primary: #f1f5f9;                     /* 主要文字：高對比亮白 */
+      --text-secondary: #a1a1aa;                   /* 次要文字：霧灰 */
+      --hero-bg: linear-gradient(135deg, #1f242d 0%, #161a22 100%); /* Hero區塊微漸層 */
+      --hero-title: #ffffff;
+      --date-picker-filter: invert(0.8);
+      --accordion-btn-bg: #1e1e1e;
+      --accordion-btn-active-bg: #2a2a2a;         /* 手風琴展開頭部：亮深灰 */
+      --table-hover-bg: #262626;                   /* 表格懸停：暗灰 */
+      --th-hover-bg: #333333;                      /* 表頭懸停：深灰 */
+    }
+    
+    /* ☀️ 淺色模式 (Light Mode) 顏色變數 */
+    [data-bs-theme="light"] {
+      --app-bg: #f8fafc;
+      --card-bg: #ffffff;
+      --card-border: #e2e8f0;
+      --input-bg: #f1f5f9;
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --hero-bg: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+      --hero-title: #1e3a8a;
+      --date-picker-filter: none;
+      --accordion-btn-bg: #ffffff;
+      --accordion-btn-active-bg: #f1f5f9;
+      --table-hover-bg: #f8fafc;
+      --th-hover-bg: #e2e8f0;
+    }
+    
+    body {
+      background-color: var(--app-bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      font-family: system-ui, -apple-system, sans-serif;
+      transition: background-color 0.2s, color 0.2s;
+    }
+    
+    .slate-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    }
+    
+    .hero-card {
+      background: var(--hero-bg);
+      border: 1px solid var(--card-border);
+    }
+    
+    .hero-card .hero-amount {
+      color: var(--hero-title);
+    }
+    
+    .form-label, label, small, .small, .text-sub {
+      color: var(--text-secondary) !important;
+      font-weight: 500;
+    }
+    
+    .form-control, .form-select, .btn-custom-dropdown {
+      background-color: var(--input-bg) !important;
+      border: 1px solid var(--card-border) !important;
+      color: var(--text-primary) !important;
+    }
+    
+    .form-control:focus, .form-select:focus, .btn-custom-dropdown:focus {
+      border-color: #3b82f6 !important;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25) !important;
+    }
+    
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: var(--date-picker-filter);
+      cursor: pointer;
+    }
+    
+    .btn-slate-primary {
+      background-color: #2563eb;
+      border: none;
+      color: #ffffff;
+      font-weight: 600;
+    }
+    
+    .btn-slate-primary:hover {
+      background-color: #1d4ed8;
+      color: #ffffff;
+    }
+    
+    .dropdown-menu {
+      background-color: var(--card-bg) !important;
+      border: 1px solid var(--card-border) !important;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+    }
+    
+    .dropdown-item { color: var(--text-primary) !important; }
+    .dropdown-item:hover { background-color: var(--input-bg) !important; }
+    
+    /* 📊 表格與手風琴樣式優化 */
+    .accordion-item {
+      background-color: transparent !important;
+      border: 1px solid var(--card-border) !important;
+      border-radius: 12px !important;
+      overflow: hidden;
+      margin-bottom: 0.75rem;
+    }
+    
+    .accordion-button {
+      background-color: var(--accordion-btn-bg) !important;
+      color: var(--text-primary) !important;
+      box-shadow: none !important;
+      padding: 1rem 1.25rem;
+    }
+    
+    .accordion-button:not(.collapsed) {
+      background-color: var(--accordion-btn-active-bg) !important;
+    }
+    
+    .accordion-body {
+      background-color: var(--card-bg) !important;
+      padding: 0;
+    }
+    
+    .table-custom {
+      margin-bottom: 0;
+      color: var(--text-primary) !important;
+    }
+    
+    .table-custom th {
+      background-color: var(--input-bg);
+      color: var(--text-secondary);
+      font-weight: 600;
+      font-size: 0.85rem;
+      border-bottom: 1px solid var(--card-border);
+      padding: 0.75rem 1rem;
+      user-select: none;
+    }
+    
+    /* 🟢 可排序表頭樣式 */
+    .table-custom th.sortable {
+      cursor: pointer;
+      transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+    }
+    
+    .table-custom th.sortable:hover {
+      background-color: var(--th-hover-bg);
+      color: var(--text-primary);
+    }
+    
+    .table-custom th.sortable.active {
+      color: #60a5fa;
+    }
+    
+    .table-custom td {
+      border-bottom: 1px solid var(--card-border);
+      padding: 0.85rem 1rem;
+      vertical-align: middle;
+      font-size: 0.95rem;
+    }
+    
+    .table-custom tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .table-custom tbody tr:hover {
+      background-color: var(--table-hover-bg);
+    }
+    
+    /* 📱 RWD 高度處理 */
+    @media (min-width: 992px) {
+      .history-container {
+        max-height: 580px;
+        overflow-y: auto;
+      }
+    }
+    
+    @media (max-width: 991.98px) {
+      .history-container {
+        max-height: none !important;
+        overflow-y: visible !important;
+      }
+    }
   </style>
 </head>
 <body class="py-4">
