@@ -594,16 +594,16 @@
                   <table class="table table-custom align-middle">
                     <thead>
                       <tr>
-                        <th style="width: 25%;" class="sortable ${tableSortKey === 'date' ? 'active' : ''}" onclick="handleTableSort('date')">
+                        <th style="width: 25%;" class="sortable text-nowrap ${tableSortKey === 'date' ? 'active' : ''}" onclick="handleTableSort('date')">
                           日期 ${getSortIconHtml('date')}
                         </th>
-                        <th style="width: 20%;" class="sortable ${tableSortKey === 'type' ? 'active' : ''}" onclick="handleTableSort('type')">
+                        <th style="width: 25%;" class="sortable text-nowrap ${tableSortKey === 'type' ? 'active' : ''}" onclick="handleTableSort('type')">
                           類型 ${getSortIconHtml('type')}
                         </th>
-                        <th style="width: 25%;" class="sortable ${tableSortKey === 'amount' ? 'active' : ''}" onclick="handleTableSort('amount')">
+                        <th style="width: 25%;" class="sortable text-nowrap ${tableSortKey === 'amount' ? 'active' : ''}" onclick="handleTableSort('amount')">
                           金額 ${getSortIconHtml('amount')}
                         </th>
-                        <th style="width: 30%;">備註</th>
+                        <th style="width: 25%;" class="text-nowrap">備註</th>
                       </tr>
                     </thead>
                     <tbody>
