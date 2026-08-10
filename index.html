@@ -380,34 +380,41 @@
     async function initConfig() {
       const urlParams = new URLSearchParams(window.location.search);
       let loadConfigParam = urlParams.get('load');
-    
+
       if (!loadConfigParam) {
         throw new Error("網址缺少 `?load=???` 設定檔參數。");
       }
-    
+
       // 自動補上 .json 副檔名
       if (!loadConfigParam.endsWith('.json')) {
         loadConfigParam += '.json';
       }
-    
+
       // 清除前導斜線，指定從目前目錄下的 config 資料夾讀取
       const cleanFileName = loadConfigParam.replace(/^\/+/, '');
       const jsonUrl = `./config/${cleanFileName}`;
-    
+
       const response = await fetch(jsonUrl);
       if (!response.ok) {
         throw new Error(`無法讀取設定檔 (${jsonUrl}) - HTTP ${response.status}`);
       }
       
       const config = await response.json();
-    
+
       if (!config.title || !config.apiUrl) {
         throw new Error("JSON 設定檔格式不完整，需包含 `title` 與 `apiUrl` 欄位。");
       }
-    
+
       document.title = config.title;
       API_URL = config.apiUrl;
     }
+
+    const systemThemeMedia = window.matchMedia('(prefers-color-scheme: dark)');
+    systemThemeMedia.addEventListener('change', () => {
+      if (localStorage.getItem('user-theme') === 'auto') {
+        applyTheme('auto');
+      }
+    });
 
     function changeTheme(mode) {
       localStorage.setItem('user-theme', mode);
