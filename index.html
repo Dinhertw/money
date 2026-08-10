@@ -558,7 +558,7 @@
               <td class="fw-bold ${isBorrow ? 'text-danger' : 'text-success'} text-nowrap">
                 ${isBorrow ? '+' : '-'} NT$ ${amt.toLocaleString()}
               </td>
-              <td class="text-sub">${item.note || '-'}</td>
+              <td class="text-sub text-nowrap">${item.note || '-'}</td>
             </tr>
           `;
         }).join('');
@@ -594,16 +594,16 @@
                   <table class="table table-custom align-middle">
                     <thead>
                       <tr>
-                        <th style="width: 25%;" class="sortable text-nowrap ${tableSortKey === 'date' ? 'active' : ''}" onclick="handleTableSort('date')">
+                        <th class="sortable text-nowrap ${tableSortKey === 'date' ? 'active' : ''}" onclick="handleTableSort('date')">
                           日期 ${getSortIconHtml('date')}
                         </th>
-                        <th style="width: 25%;" class="sortable text-nowrap ${tableSortKey === 'type' ? 'active' : ''}" onclick="handleTableSort('type')">
+                        <th class="sortable text-nowrap ${tableSortKey === 'type' ? 'active' : ''}" onclick="handleTableSort('type')">
                           類型 ${getSortIconHtml('type')}
                         </th>
-                        <th style="min-width: 25%;" class="sortable text-nowrap ${tableSortKey === 'amount' ? 'active' : ''}" onclick="handleTableSort('amount')">
+                        <th class="sortable text-nowrap ${tableSortKey === 'amount' ? 'active' : ''}" onclick="handleTableSort('amount')">
                           金額 ${getSortIconHtml('amount')}
                         </th>
-                        <th style="min-width: 25%;" class="text-sub text-nowrap">備註</th>
+                        <th style="min-width: 150px;" class="text-sub text-nowrap">備註</th>
                       </tr>
                     </thead>
                     <tbody>
