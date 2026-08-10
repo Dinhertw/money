@@ -8,10 +8,12 @@
 
   <link rel="icon" type="image/png" href="https://dinhertw.github.io/money/icon.png">
   
-  <!-- Bootstrap 5.3 CSS & Icons -->
+  <!-- Bootstrap 5.3 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   
+  <!-- Lucide Icons 套件 (高質感極簡風格) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
   <!-- SweetAlert2 彈出視窗套件 -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -213,6 +215,14 @@
       justify-content: center !important;
       align-items: center !important;
     }
+
+    /* Lucide 尺寸對齊微調 */
+    i[data-lucide] {
+      width: 1.25rem;
+      height: 1.25rem;
+      display: inline-block;
+      vertical-align: -0.2em;
+    }
     
     @media (min-width: 992px) {
       .history-container {
@@ -240,7 +250,7 @@
           <div class="card slate-card hero-card p-3">
             <div class="card-body">
               <div class="d-flex align-items-center gap-2 mb-2">
-                <i class="bi bi-wallet2 text-primary fs-5"></i>
+                <i data-lucide="wallet" class="text-primary"></i>
                 <span class="text-sub">目前待還總金額</span>
               </div>
               <h2 class="display-6 fw-bold mb-0 hero-amount" id="totalOwed">NT$ --</h2>
@@ -250,7 +260,7 @@
           <div class="card slate-card">
             <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0">
               <h5 class="card-title fw-bold m-0 d-flex align-items-center gap-2">
-                <i class="bi bi-pencil-square text-primary"></i> 新增紀錄
+                <i data-lucide="file-pen-line" class="text-primary"></i> 新增紀錄
               </h5>
             </div>
             <div class="card-body p-4">
@@ -266,17 +276,17 @@
                     <input type="hidden" id="type" value="借錢">
                     <div class="dropdown">
                       <button class="btn btn-custom-dropdown dropdown-toggle w-100 rounded-3 text-start d-flex align-items-center justify-content-between" type="button" id="typeDropdownBtn" data-bs-toggle="dropdown">
-                        <span id="typeDropdownLabel"><i class="bi bi-arrow-up-right-square text-danger me-1"></i> 借錢</span>
+                        <span id="typeDropdownLabel"><i data-lucide="arrow-up-right" class="text-danger me-1"></i> 借錢</span>
                       </button>
                       <ul class="dropdown-menu dropdown-menu-end w-100 rounded-3">
                         <li>
-                          <a class="dropdown-item py-2" href="#" onclick="selectType('借錢', '<i class=\'bi bi-arrow-up-right-square text-danger me-1\'></i> 借錢'); return false;">
-                            <i class="bi bi-arrow-up-right-square text-danger me-1"></i> 借錢
+                          <a class="dropdown-item py-2" href="#" onclick="selectType('借錢', '<i data-lucide=\'arrow-up-right\' class=\'text-danger me-1\'></i> 借錢'); return false;">
+                            <i data-lucide="arrow-up-right" class="text-danger me-1"></i> 借錢
                           </a>
                         </li>
                         <li>
-                          <a class="dropdown-item py-2" href="#" onclick="selectType('還錢', '<i class=\'bi bi-arrow-down-left-square text-success me-1\'></i> 還錢'); return false;">
-                            <i class="bi bi-arrow-down-left-square text-success me-1"></i> 還錢
+                          <a class="dropdown-item py-2" href="#" onclick="selectType('還錢', '<i data-lucide=\'arrow-down-left\' class=\'text-success me-1\'></i> 還錢'); return false;">
+                            <i data-lucide="arrow-down-left" class="text-success me-1"></i> 還錢
                           </a>
                         </li>
                       </ul>
@@ -293,7 +303,7 @@
                   </div>
                   <div class="col-12 pt-2">
                     <button type="submit" class="btn btn-slate-primary w-100 py-2.5 rounded-3 d-flex align-items-center justify-content-center gap-2" id="submitBtn">
-                      <i class="bi bi-send-fill"></i> 送出紀錄
+                      <i data-lucide="send"></i> 送出紀錄
                     </button>
                   </div>
                 </div>
@@ -308,13 +318,13 @@
           <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0 d-flex align-items-center justify-content-between flex-wrap gap-2">
             <div class="d-flex align-items-center gap-2">
               <h5 class="card-title fw-bold m-0 d-flex align-items-center gap-2">
-                <i class="bi bi-clock-history text-primary"></i> 歷史紀錄
+                <i data-lucide="history" class="text-primary"></i> 歷史紀錄
               </h5>
               <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2.5 py-1 fw-normal small" id="recordCount">0 筆</span>
             </div>
 
             <button class="btn btn-sm btn-custom-dropdown rounded-pill px-3 py-1 d-flex align-items-center gap-1.5" onclick="toggleSortOrder()" id="sortBtn">
-              <i class="bi bi-sort-down text-primary"></i> <span id="sortLabel">最新月在前</span>
+              <i data-lucide="arrow-down-wide-narrow" class="text-primary"></i> <span id="sortLabel">最新月在前</span>
             </button>
           </div>
 
@@ -337,10 +347,10 @@
           <span id="themeDropdownLabel">主題設定</span>
         </button>
         <ul class="dropdown-menu shadow rounded-3">
-          <li><a class="dropdown-item" href="#" onclick="changeTheme('light'); return false;"><i class="bi bi-sun-fill text-warning me-2"></i>淺色模式</a></li>
-          <li><a class="dropdown-item" href="#" onclick="changeTheme('dark'); return false;"><i class="bi bi-moon-stars-fill text-primary me-2"></i>深色模式</a></li>
+          <li><a class="dropdown-item" href="#" onclick="changeTheme('light'); return false;"><i data-lucide="sun" class="text-warning me-2"></i>淺色模式</a></li>
+          <li><a class="dropdown-item" href="#" onclick="changeTheme('dark'); return false;"><i data-lucide="moon" class="text-primary me-2"></i>深色模式</a></li>
           <li><hr class="dropdown-divider opacity-25"></li>
-          <li><a class="dropdown-item" href="#" onclick="changeTheme('auto'); return false;"><i class="bi bi-display me-2"></i>隨系統切換</a></li>
+          <li><a class="dropdown-item" href="#" onclick="changeTheme('auto'); return false;"><i data-lucide="monitor" class="me-2"></i>隨系統切換</a></li>
         </ul>
       </div>
       <div class="text-sub opacity-75">Copyright © 2026.08 帳務管理系統 by Dinher</div>
@@ -360,6 +370,12 @@
     let tableSortOrder = 'desc';
 
     document.getElementById('date').valueAsDate = new Date();
+
+    function refreshIcons() {
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+    }
 
     async function initConfig() {
       const urlParams = new URLSearchParams(window.location.search);
@@ -412,11 +428,12 @@
       document.documentElement.setAttribute('data-bs-theme', targetTheme);
 
       const labelMap = {
-        light: '<i class="bi bi-sun-fill text-warning me-1"></i> 淺色模式',
-        dark: '<i class="bi bi-moon-stars-fill text-primary me-1"></i> 深色模式',
-        auto: '<i class="bi bi-display me-1"></i> 隨系統切換'
+        light: '<i data-lucide="sun" class="text-warning me-1"></i> 淺色模式',
+        dark: '<i data-lucide="moon" class="text-primary me-1"></i> 深色模式',
+        auto: '<i data-lucide="monitor" class="me-1"></i> 隨系統切換'
       };
       document.getElementById('themeDropdownLabel').innerHTML = labelMap[mode] || labelMap.auto;
+      refreshIcons();
     }
 
     const currentSavedTheme = localStorage.getItem('user-theme') || 'auto';
@@ -427,9 +444,9 @@
       
       const sortBtn = document.getElementById('sortBtn');
       if (currentSortOrder === 'desc') {
-        sortBtn.innerHTML = `<i class="bi bi-sort-down text-primary"></i> <span>最新月在前</span>`;
+        sortBtn.innerHTML = `<i data-lucide="arrow-down-wide-narrow" class="text-primary"></i> <span>最新月在前</span>`;
       } else {
-        sortBtn.innerHTML = `<i class="bi bi-sort-up text-primary"></i> <span>最舊月在前</span>`;
+        sortBtn.innerHTML = `<i data-lucide="arrow-up-narrow-wide" class="text-primary"></i> <span>最舊月在前</span>`;
       }
 
       renderHistoryList();
@@ -447,11 +464,11 @@
 
     function getSortIconHtml(key) {
       if (tableSortKey !== key) {
-        return `<i class="bi bi-arrow-down-up opacity-25 ms-1"></i>`;
+        return `<i data-lucide="arrow-up-down" class="opacity-25 ms-1"></i>`;
       }
       return tableSortOrder === 'asc' 
-        ? `<i class="bi bi-arrow-up text-primary ms-1"></i>`
-        : `<i class="bi bi-arrow-down text-primary ms-1"></i>`;
+        ? `<i data-lucide="arrow-up" class="text-primary ms-1"></i>`
+        : `<i data-lucide="arrow-down" class="text-primary ms-1"></i>`;
     }
 
     function updateUIStats() {
@@ -554,7 +571,7 @@
                       aria-expanded="${isShow ? 'true' : 'false'}" 
                       aria-controls="${collapseId}">
                 <div class="d-flex align-items-center gap-2 flex-grow-1 me-2">
-                  <i class="bi bi-calendar3 text-primary"></i>
+                  <i data-lucide="calendar" class="text-primary"></i>
                   <span class="fw-bold">${formattedMonthLabel}</span>
                   <span class="badge bg-secondary-subtle text-secondary rounded-pill small ms-1">${monthItems.length} 筆</span>
                 </div>
@@ -597,11 +614,14 @@
           </div>
         `;
       }).join('');
+
+      refreshIcons();
     }
 
     function selectType(value, labelHtml) {
       document.getElementById('type').value = value;
       document.getElementById('typeDropdownLabel').innerHTML = labelHtml;
+      refreshIcons();
     }
 
     function getSwalStyle() {
@@ -613,11 +633,11 @@
     }
 
     const alertIconMap = {
-      info: 'bi-info-circle-fill',
-      warning: 'bi-exclamation-triangle-fill',
-      danger: 'bi-slash-circle-fill',
-      success: 'bi-check-circle-fill',
-      primary: 'bi-megaphone-fill'
+      info: 'info',
+      warning: 'triangle-alert',
+      danger: 'octagon-alert',
+      success: 'check-circle',
+      primary: 'megaphone'
     };
 
     async function loadData(showLoading = true) {
@@ -645,11 +665,11 @@
         if (data.announcements && data.announcements.length > 0) {
           container.innerHTML = data.announcements.map((item) => {
             const alertType = item.type || 'info';
-            const iconClass = alertIconMap[alertType] || 'bi-megaphone-fill';
+            const iconName = alertIconMap[alertType] || 'megaphone';
 
             return `
               <div class="alert alert-${alertType} alert-dismissible fade show m-0 rounded-3 d-flex align-items-center gap-2 border-0 shadow-sm" role="alert">
-                <i class="bi ${iconClass} fs-5 flex-shrink-0"></i>
+                <i data-lucide="${iconName}" class="flex-shrink-0"></i>
                 <div class="flex-grow-1 fw-medium">${item.content}</div>
               </div>
             `;
@@ -777,9 +797,10 @@
 
         document.getElementById('monthlyHistoryAccordion').innerHTML = `
           <div class="text-center text-danger py-5 fw-bold">
-            <i class="bi bi-exclamation-octagon fs-1 d-block mb-2"></i>
+            <i data-lucide="circle-alert" style="width: 2.5rem; height: 2.5rem;" class="d-block mx-auto mb-2"></i>
             ${err.message}
           </div>`;
+        refreshIcons();
       }
     }
 
