@@ -32,7 +32,7 @@
       --accordion-btn-bg: #1e1e1e;
       --accordion-btn-active-bg: #2a2a2a;
       --table-hover-bg: #262626;
-      --th-hover-bg: #333333;
+      --th-hover-bg: 0;
     }
     
     /* ☀️ 淺色模式 (Light Mode) */
@@ -49,7 +49,7 @@
       --accordion-btn-bg: #ffffff;
       --accordion-btn-active-bg: #f1f5f9;
       --table-hover-bg: #f8fafc;
-      --th-hover-bg: #e2e8f0;
+      --th-hover-bg: 0;
     }
 
     html, body {
@@ -75,7 +75,7 @@
       background-color: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 16px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+      /*box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);*/
     }
     
     .hero-card {
@@ -98,7 +98,7 @@
       color: var(--text-primary) !important;
     }
     
-    .form-control:focus, .form-select:focus, .btn-custom-dropdown:focus {
+    .form-control:focus, .form-select:focus, .btn-custom-dropdown:focus{
       border-color: #3b82f6 !important;
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25) !important;
     }
@@ -147,6 +147,7 @@
     .accordion-button:not(.collapsed) {
       background-color: var(--accordion-btn-active-bg) !important;
     }
+    
     
     .accordion-body {
       background-color: var(--card-bg) !important;
@@ -228,6 +229,7 @@
       .history-container {
         max-height: 580px;
         overflow-y: auto;
+        padding: 3px;
       }
     }
     
