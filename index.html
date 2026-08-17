@@ -11,50 +11,45 @@
   <!-- Bootstrap 5.3 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   
-  <!-- Lucide Icons -->
+  <!-- Lucide Icons 套件 (高質感極簡風格) -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
-  <!-- SweetAlert2 -->
+  <!-- SweetAlert2 彈出視窗套件 -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <style>
-    /* 🌊 Liquid Glass 主題變數定義 */
+    /* 🎨 深色模式 (Dark Mode) */
     [data-bs-theme="dark"] {
-      --app-bg: #0b0f19;
-      --glass-bg: rgba(22, 30, 46, 0.55);
-      --glass-border: rgba(255, 255, 255, 0.12);
-      --glass-shine: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 60%);
-      --input-bg: rgba(15, 23, 42, 0.6);
-      --text-primary: #f8fafc;
-      --text-secondary: #94a3b8;
-      --hero-bg: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(147, 51, 234, 0.15) 100%);
+      --app-bg: #121212;
+      --card-bg: #1e1e1e;
+      --card-border: #2d2d2d;
+      --input-bg: #262626;
+      --text-primary: #f1f5f9;
+      --text-secondary: #a1a1aa;
+      --hero-bg: linear-gradient(135deg, #1f242d 0%, #161a22 100%);
       --hero-title: #ffffff;
       --date-picker-filter: invert(0.8);
-      --accordion-btn-bg: rgba(30, 41, 59, 0.4);
-      --accordion-btn-active-bg: rgba(30, 41, 59, 0.7);
-      --table-hover-bg: rgba(255, 255, 255, 0.05);
-      --th-hover-bg: rgba(255, 255, 255, 0.1);
-      --glow-1: #3b82f6;
-      --glow-2: #8b5cf6;
+      --accordion-btn-bg: #1e1e1e;
+      --accordion-btn-active-bg: #2a2a2a;
+      --table-hover-bg: #262626;
+      --th-hover-bg: #333333;
     }
     
+    /* ☀️ 淺色模式 (Light Mode) */
     [data-bs-theme="light"] {
-      --app-bg: #f0f4f9;
-      --glass-bg: rgba(255, 255, 255, 0.65);
-      --glass-border: rgba(255, 255, 255, 0.8);
-      --glass-shine: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 60%);
-      --input-bg: rgba(255, 255, 255, 0.7);
+      --app-bg: #f8fafc;
+      --card-bg: #ffffff;
+      --card-border: #e2e8f0;
+      --input-bg: #f1f5f9;
       --text-primary: #0f172a;
-      --text-secondary: #475569;
-      --hero-bg: linear-gradient(135deg, rgba(219, 234, 254, 0.8) 0%, rgba(221, 214, 254, 0.6) 100%);
+      --text-secondary: #334155;
+      --hero-bg: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
       --hero-title: #1e3a8a;
       --date-picker-filter: none;
-      --accordion-btn-bg: rgba(255, 255, 255, 0.5);
-      --accordion-btn-active-bg: rgba(255, 255, 255, 0.85);
-      --table-hover-bg: rgba(0, 0, 0, 0.03);
-      --th-hover-bg: rgba(0, 0, 0, 0.05);
-      --glow-1: #60a5fa;
-      --glow-2: #c084fc;
+      --accordion-btn-bg: #ffffff;
+      --accordion-btn-active-bg: #f1f5f9;
+      --table-hover-bg: #f8fafc;
+      --th-hover-bg: #e2e8f0;
     }
 
     html, body {
@@ -71,82 +66,21 @@
       display: flex;
       flex-direction: column;
       font-family: system-ui, -apple-system, sans-serif;
-      transition: background-color 0.3s, color 0.3s;
+      transition: background-color 0.2s, color 0.2s;
       padding-top: 1.5rem !important;
       padding-bottom: 1.5rem !important;
-      position: relative;
-      overflow-x: hidden;
     }
-
-    /* 🔮 背景流體光暈特效 */
-    .background-glow {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: -1;
-      overflow: hidden;
-      pointer-events: none;
-    }
-
-    .glow-orb {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(90px);
-      opacity: 0.45;
-      animation: float 20s infinite alternate ease-in-out;
-    }
-
-    .glow-orb-1 {
-      width: 450px;
-      height: 450px;
-      background: var(--glow-1);
-      top: -100px;
-      left: -100px;
-    }
-
-    .glow-orb-2 {
-      width: 500px;
-      height: 500px;
-      background: var(--glow-2);
-      bottom: -150px;
-      right: -100px;
-      animation-delay: -10s;
-    }
-
-    @keyframes float {
-      0% { transform: translate(0, 0) scale(1); }
-      100% { transform: translate(80px, 60px) scale(1.15); }
-    }
-
-    /* 💎 Liquid Glass 卡片樣式 */
+    
     .slate-card {
-      background: var(--glass-bg);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid var(--glass-border);
-      border-radius: 20px;
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .slate-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 40%;
-      background: var(--glass-shine);
-      pointer-events: none;
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
     }
     
     .hero-card {
       background: var(--hero-bg);
-      backdrop-filter: blur(20px);
-      border: 1px solid var(--glass-border);
+      border: 1px solid var(--card-border);
     }
     
     .hero-card .hero-amount {
@@ -160,15 +94,13 @@
     
     .form-control, .form-select, .btn-custom-dropdown {
       background-color: var(--input-bg) !important;
-      backdrop-filter: blur(8px);
-      border: 1px solid var(--glass-border) !important;
+      border: 1px solid var(--card-border) !important;
       color: var(--text-primary) !important;
-      transition: all 0.2s ease;
     }
     
     .form-control:focus, .form-select:focus, .btn-custom-dropdown:focus {
       border-color: #3b82f6 !important;
-      box-shadow: 0 0 15px rgba(59, 130, 246, 0.3) !important;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25) !important;
     }
     
     input[type="date"]::-webkit-calendar-picker-indicator {
@@ -177,40 +109,32 @@
     }
     
     .btn-slate-primary {
-      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      background-color: #2563eb;
       border: none;
       color: #ffffff;
       font-weight: 600;
-      box-shadow: 0 4px 15px rgba(37, 99, 235, 0.35);
-      transition: all 0.2s ease;
     }
     
     .btn-slate-primary:hover {
-      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
+      background-color: #1d4ed8;
       color: #ffffff;
-      transform: translateY(-1px);
     }
     
     .dropdown-menu {
-      background: var(--glass-bg) !important;
-      backdrop-filter: blur(20px) !important;
-      -webkit-backdrop-filter: blur(20px) !important;
-      border: 1px solid var(--glass-border) !important;
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25) !important;
-      border-radius: 14px;
+      background-color: var(--card-bg) !important;
+      border: 1px solid var(--card-border) !important;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
     }
     
-    .dropdown-item { color: var(--text-primary) !important; transition: background-color 0.15s; }
-    .dropdown-item:hover { background-color: var(--table-hover-bg) !important; }
+    .dropdown-item { color: var(--text-primary) !important; }
+    .dropdown-item:hover { background-color: var(--input-bg) !important; }
     
     .accordion-item {
       background-color: transparent !important;
-      border: 1px solid var(--glass-border) !important;
-      border-radius: 14px !important;
+      border: 1px solid var(--card-border) !important;
+      border-radius: 12px !important;
       overflow: hidden;
       margin-bottom: 0.75rem;
-      backdrop-filter: blur(10px);
     }
     
     .accordion-button {
@@ -225,7 +149,7 @@
     }
     
     .accordion-body {
-      background-color: transparent !important;
+      background-color: var(--card-bg) !important;
       padding: 0;
     }
     
@@ -239,7 +163,7 @@
       color: var(--text-secondary);
       font-weight: 600;
       font-size: 0.85rem;
-      border-bottom: 1px solid var(--glass-border);
+      border-bottom: 1px solid var(--card-border);
       padding: 0.75rem 1rem;
       user-select: none;
     }
@@ -259,7 +183,7 @@
     }
     
     .table-custom td {
-      border-bottom: 1px solid var(--glass-border);
+      border-bottom: 1px solid var(--card-border);
       padding: 0.85rem 1rem;
       vertical-align: middle;
       font-size: 0.95rem;
@@ -273,7 +197,7 @@
       background-color: var(--table-hover-bg);
     }
 
-    /* 🖥️ SweetAlert2 滿版適應 */
+    /* 🖥️ 強制 SweetAlert2 滿版且零邊距 */
     .swal2-container {
       padding: 0 !important;
     }
@@ -290,10 +214,9 @@
       flex-direction: column !important;
       justify-content: center !important;
       align-items: center !important;
-      backdrop-filter: blur(20px) !important;
     }
 
-    /* Lucide 圖示對齊 */
+    /* Lucide 尺寸對齊微調 */
     i[data-lucide] {
       width: 1.25rem;
       height: 1.25rem;
@@ -318,13 +241,7 @@
 </head>
 <body>
 
-  <!-- 背景流體光暈 -->
-  <div class="background-glow">
-    <div class="glow-orb glow-orb-1"></div>
-    <div class="glow-orb glow-orb-2"></div>
-  </div>
-
-  <div class="container flex-grow-1" style="max-width: 1000px; z-index: 1;">
+  <div class="container flex-grow-1" style="max-width: 1000px;">
     <div id="announcementContainer" class="d-flex flex-column gap-2 mb-4"></div>
 
     <div class="row g-4">
@@ -423,7 +340,7 @@
     </div>
   </div>
 
-  <footer class="mt-auto pt-5 pb-3 text-center small" style="z-index: 1;">
+  <footer class="mt-auto pt-5 pb-3 text-center small">
     <div class="container">
       <div class="dropdown d-inline-block mb-3">
         <button class="btn btn-sm btn-custom-dropdown dropdown-toggle rounded-pill px-3" type="button" id="themeDropdownBtn" data-bs-toggle="dropdown">
@@ -468,10 +385,12 @@
         throw new Error("網址缺少 `?load=???` 設定檔參數。");
       }
 
+      // 自動補上 .json 副檔名
       if (!loadConfigParam.endsWith('.json')) {
         loadConfigParam += '.json';
       }
 
+      // 清除前導斜線，指定從目前目錄下的 config 資料夾讀取
       const cleanFileName = loadConfigParam.replace(/^\/+/, '');
       const jsonUrl = `./config/${cleanFileName}`;
 
@@ -710,7 +629,7 @@
     function getSwalStyle() {
       const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
       return {
-        background: isDark ? 'rgba(18, 18, 18, 0.85)' : 'rgba(255, 255, 255, 0.85)',
+        background: isDark ? '#121212' : '#ffffff',
         color: isDark ? '#f1f5f9' : '#0f172a'
       };
     }
@@ -751,7 +670,7 @@
             const iconName = alertIconMap[alertType] || 'megaphone';
 
             return `
-              <div class="alert alert-${alertType} alert-dismissible fade show m-0 rounded-3 d-flex align-items-center gap-2 border-0 shadow-sm" style="backdrop-filter: blur(10px);" role="alert">
+              <div class="alert alert-${alertType} alert-dismissible fade show m-0 rounded-3 d-flex align-items-center gap-2 border-0 shadow-sm" role="alert">
                 <i data-lucide="${iconName}" class="flex-shrink-0"></i>
                 <div class="flex-grow-1 fw-medium">${item.content}</div>
               </div>
