@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="zh-TW" data-bs-theme="light">
+  
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>帳務管理系統</title>
+
+  <link rel="icon" type="image/png" href="https://dinhertw.github.io/money/icon.png">
+  
+  <!-- Bootstrap 5.3 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Lucide Icons 套件 (高質感極簡風格) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- SweetAlert2 彈出視窗套件 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <style>
+    /* 🎨 深色模式 (Dark Mode) */
+    [data-bs-theme="dark"] {
+      --app-bg: #121212;
+      --card-bg: #1e1e1e;
+      --card-border: #2d2d2d;
+      --input-bg: #262626;
+      --text-primary: #f1f5f9;
+      --text-secondary: #a1a1aa;
+      --hero-bg: linear-gradient(135deg, #1f242d 0%, #161a22 100%);
+      --hero-title: #ffffff;
+      --date-picker-filter: invert(0.8);
+      --accordion-btn-bg: #1e1e1e;
+      --accordion-btn-active-bg: #2a2a2a;
+      --table-hover-bg: #262626;
+      --th-hover-bg: 0;
+    }
+    
+    /* ☀️ 淺色模式 (Light Mode) */
+    [data-bs-theme="light"] {
+      --app-bg: #f8fafc;
+      --card-bg: #ffffff;
+      --card-border: #e2e8f0;
+      --input-bg: #f1f5f9;
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --hero-bg: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+      --hero-title: #1e3a8a;
+      --date-picker-filter: none;
+      --accordion-btn-bg: #ffffff;
+      --accordion-btn-active-bg: #f1f5f9;
+      --table-hover-bg: #f8fafc;
+      --th-hover-bg: 0;
+    }
+
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 100%;
+      height: 100%;
+    }
+    
+    body {
+      background-color: var(--app-bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      font-family: system-ui, -apple-system, sans-serif;
+      transition: background-color 0.2s, color 0.2s;
+      padding-top: 1.5rem !important;
+      padding-bottom: 1.5rem !important;
+    }
+    
+    .slate-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+    }
+    
+    .hero-card {
+      background: var(--hero-bg);
+      border: 1px solid var(--card-border);
+    }
+    
+    .hero-card .hero-amount {
+      color: var(--hero-title);
+    }
+    
+    .form-label, label, small, .small, .text-sub {
+      color: var(--text-secondary) !important;
+      font-weight: 500;
+    }
+    
+    .form-control, .form-select, .btn-custom-dropdown {
+      background-color: var(--input-bg) !important;
+      border: 1px solid var(--card-border) !important;
+      color: var(--text-primary) !important;
+    }
+    
+    .form-control:focus, .form-select:focus, .btn-custom-dropdown:focus{
+      border-color: #3b82f6 !important;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25) !important;
+    }
+    
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: var(--date-picker-filter);
+      cursor: pointer;
+    }
+    
+    .btn-slate-primary {
+      background-color: #2563eb;
+      border: none;
+      color: #ffffff;
+      font-weight: 600;
+    }
+    
+    .btn-slate-primary:hover {
+      background-color: #1d4ed8;
+      color: #ffffff;
+    }
+    
+    .dropdown-menu {
+      background-color: var(--card-bg) !important;
+      border: 1px solid var(--card-border) !important;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+    }
+    
+    .dropdown-item { color: var(--text-primary) !important; }
+    .dropdown-item:hover { background-color: var(--input-bg) !important; }
+    
+    .accordion-item {
+      background-color: transparent !important;
+      border: 1px solid var(--card-border) !important;
+      border-radius: 12px !important;
+      overflow: hidden;
+      margin-bottom: 0.75rem;
+    }
+    
+    .accordion-button {
+      background-color: var(--accordion-btn-bg) !important;
+      color: var(--text-primary) !important;
+      box-shadow: none !important;
+      padding: 1rem 1.25rem;
+    }
+    
+    .accordion-button:not(.collapsed) {
+      background-color: var(--accordion-btn-active-bg) !important;
+    }
+    
+    .accordion-body {
+      background-color: var(--card-bg) !important;
+      padding: 0;
+    }
+    
+    .table-custom {
+      margin-bottom: 0;
+      color: var(--text-primary) !important;
+    }
+    
+    .table-custom th {
+      background-color: var(--input-bg);
+      color: var(--text-secondary);
+      font-weight: 600;
+      font-size: 0.85rem;
+      border-bottom: 1px solid var(--card-border);
+      padding: 0.75rem 1rem;
+      user-select: none;
+    }
+    
+    .table-custom th.sortable {
+      cursor: pointer;
+      transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+    }
+    
+    .table-custom th.sortable:hover {
+      background-color: var(--th-hover-bg);
+      color: var(--text-primary);
+    }
+    
+    .table-custom th.sortable.active {
+      color: #60a5fa;
+    }
+    
+    .table-custom td {
+      border-bottom: 1px solid var(--card-border);
+      padding: 0.85rem 1rem;
+      vertical-align: middle;
+      font-size: 0.95rem;
+    }
+    
+    .table-custom tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .table-custom tbody tr:hover {
+      background-color: var(--table-hover-bg);
+    }
+
+    /* 🖥️ 強制 SweetAlert2 滿版且零邊距 */
+    .swal2-container {
+      padding: 0 !important;
+    }
+
+    .swal2-container .swal-fullscreen-popup {
+      width: 100vw !important;
+      height: 100vh !important;
+      max-width: 100vw !important;
+      max-height: 100vh !important;
+      border-radius: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: center !important;
+      align-items: center !important;
+    }
+
+    /* Lucide 尺寸對齊微調 */
+    i[data-lucide] {
+      width: 1.25rem;
+      height: 1.25rem;
+      display: inline-block;
+      vertical-align: -0.2em;
+    }
+    
+    @media (min-width: 992px) {
+      .history-container {
+        max-height: 580px;
+        overflow-y: auto;
+        padding: 3px;
+      }
+    }
+    
+    @media (max-width: 991.98px) {
+      .history-container {
+        max-height: none !important;
+        overflow-y: visible !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container flex-grow-1" style="max-width: 1000px;">
+    <div id="announcementContainer" class="d-flex flex-column gap-2 mb-4"></div>
+
+    <div class="row g-4">
+      <div class="col-12 col-lg-5">
+        <div class="d-flex flex-column gap-3 sticky-lg-top" style="top: 1.5rem; z-index: 10;">
+          <div class="card slate-card hero-card p-3">
+            <div class="card-body">
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <i data-lucide="wallet" class="text-primary"></i>
+                <span class="text-sub">目前待還總金額</span>
+              </div>
+              <h2 class="display-6 fw-bold mb-0 hero-amount" id="totalOwed">NT$ --</h2>
+            </div>
+          </div>
+
+          <div class="card slate-card">
+            <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0">
+              <h5 class="card-title fw-bold m-0 d-flex align-items-center gap-2">
+                <i data-lucide="file-pen-line" class="text-primary"></i> 新增紀錄
+              </h5>
+            </div>
+            <div class="card-body p-4">
+              <form id="ledgerForm">
+                <div class="row g-3">
+                  <div class="col-6">
+                    <label for="date" class="form-label small">日期</label>
+                    <input type="date" class="form-control rounded-3" id="date" required>
+                  </div>
+
+                  <div class="col-6">
+                    <label class="form-label small">類型</label>
+                    <input type="hidden" id="type" value="借錢">
+                    <div class="dropdown">
+                      <button class="btn btn-custom-dropdown dropdown-toggle w-100 rounded-3 text-start d-flex align-items-center justify-content-between" type="button" id="typeDropdownBtn" data-bs-toggle="dropdown">
+                        <span id="typeDropdownLabel"><i data-lucide="arrow-up-right" class="text-danger me-1"></i> 借錢</span>
+                      </button>
+                      <ul class="dropdown-menu dropdown-menu-end w-100 rounded-3">
+                        <li>
+                          <a class="dropdown-item py-2" href="#" onclick="selectType('借錢', '<i data-lucide=\'arrow-up-right\' class=\'text-danger me-1\'></i> 借錢'); return false;">
+                            <i data-lucide="arrow-up-right" class="text-danger me-1"></i> 借錢
+                          </a>
+                        </li>
+                        <li>
+                          <a class="dropdown-item py-2" href="#" onclick="selectType('還錢', '<i data-lucide=\'arrow-down-left\' class=\'text-success me-1\'></i> 還錢'); return false;">
+                            <i data-lucide="arrow-down-left" class="text-success me-1"></i> 還錢
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div class="col-12">
+                    <label for="amount" class="form-label small">金額 (NT$)</label>
+                    <input type="number" class="form-control rounded-3" id="amount" min="1" required placeholder="例如：100">
+                  </div>
+                  <div class="col-12">
+                    <label for="note" class="form-label small">備註說明</label>
+                    <input type="text" class="form-control rounded-3" id="note" placeholder="例如：午餐、飲料、轉帳">
+                  </div>
+                  <div class="col-12 pt-2">
+                    <button type="submit" class="btn btn-slate-primary w-100 py-2.5 rounded-3 d-flex align-items-center justify-content-center gap-2" id="submitBtn">
+                      <i data-lucide="send"></i> 送出紀錄
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-lg-7">
+        <div class="card slate-card">
+          <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0 d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2">
+              <h5 class="card-title fw-bold m-0 d-flex align-items-center gap-2">
+                <i data-lucide="history" class="text-primary"></i> 歷史紀錄
+              </h5>
+              <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2.5 py-1 fw-normal small" id="recordCount">0 筆</span>
+            </div>
+
+            <button class="btn btn-sm btn-custom-dropdown rounded-pill px-3 py-1 d-flex align-items-center gap-1.5" onclick="toggleSortOrder()" id="sortBtn">
+              <i data-lucide="arrow-down-wide-narrow" class="text-primary"></i> <span id="sortLabel">最新月在前</span>
+            </button>
+          </div>
+
+          <div class="card-body p-4">
+            <div class="history-container">
+              <div class="accordion" id="monthlyHistoryAccordion">
+                <div class="text-center text-sub py-5">載入中...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="mt-auto pt-5 pb-3 text-center small">
+    <div class="container">
+      <div class="dropdown d-inline-block mb-3">
+        <button class="btn btn-sm btn-custom-dropdown dropdown-toggle rounded-pill px-3" type="button" id="themeDropdownBtn" data-bs-toggle="dropdown">
+          <span id="themeDropdownLabel">主題設定</span>
+        </button>
+        <ul class="dropdown-menu shadow rounded-3">
+          <li><a class="dropdown-item" href="#" onclick="changeTheme('light'); return false;"><i data-lucide="sun" class="text-warning me-2"></i>淺色模式</a></li>
+          <li><a class="dropdown-item" href="#" onclick="changeTheme('dark'); return false;"><i data-lucide="moon" class="text-primary me-2"></i>深色模式</a></li>
+          <li><hr class="dropdown-divider opacity-25"></li>
+          <li><a class="dropdown-item" href="#" onclick="changeTheme('auto'); return false;"><i data-lucide="monitor" class="me-2"></i>隨系統切換</a></li>
+        </ul>
+      </div>
+      <div class="text-sub opacity-75">Copyright © 2026.08 帳務管理系統 by Dinher</div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    let API_URL = null;
+    let globalHistoryData = [];
+    let currentTotalOwed = 0;
+    let currentSortOrder = 'desc';
+
+    let tableSortKey = 'date';
+    let tableSortOrder = 'desc';
+
+    // 💡 優化 3：精確取得使用者裝置本地時區的 YYYY-MM-DD 日期
+    function getLocalDateString() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    document.getElementById('date').value = getLocalDateString();
+
+    function refreshIcons() {
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+    }
+
+    async function initConfig() {
+      const urlParams = new URLSearchParams(window.location.search);
+      let loadConfigParam = urlParams.get('load');
+
+      if (!loadConfigParam) {
+        throw new Error("網址缺少 `?load=???` 設定檔參數。");
+      }
+
+      if (!loadConfigParam.endsWith('.json')) {
+        loadConfigParam += '.json';
+      }
+
+      const cleanFileName = loadConfigParam.replace(/^\/+/, '');
+      const jsonUrl = `./config/${cleanFileName}`;
+
+      const response = await fetch(jsonUrl);
+      if (!response.ok) {
+        throw new Error(`無法讀取設定檔 (${jsonUrl}) - HTTP ${response.status}`);
+      }
+      
+      const config = await response.json();
+
+      if (!config.title || !config.apiUrl) {
+        throw new Error("JSON 設定檔格式不完整，需包含 `title` 與 `apiUrl` 欄位。");
+      }
+
+      document.title = config.title;
+      API_URL = config.apiUrl;
+    }
+
+    const systemThemeMedia = window.matchMedia('(prefers-color-scheme: dark)');
+    systemThemeMedia.addEventListener('change', () => {
+      if (localStorage.getItem('user-theme') === 'auto') {
+        applyTheme('auto');
+      }
+    });
+
+    function changeTheme(mode) {
+      localStorage.setItem('user-theme', mode);
+      applyTheme(mode);
+    }
+
+    function applyTheme(mode) {
+      let targetTheme = mode;
+      if (mode === 'auto') {
+        targetTheme = systemThemeMedia.matches ? 'dark' : 'light';
+      }
+
+      document.documentElement.setAttribute('data-bs-theme', targetTheme);
+
+      const labelMap = {
+        light: '<i data-lucide="sun" class="text-warning me-1"></i> 淺色模式',
+        dark: '<i data-lucide="moon" class="text-primary me-1"></i> 深色模式',
+        auto: '<i data-lucide="monitor" class="me-1"></i> 隨系統切換'
+      };
+      document.getElementById('themeDropdownLabel').innerHTML = labelMap[mode] || labelMap.auto;
+      refreshIcons();
+    }
+
+    const currentSavedTheme = localStorage.getItem('user-theme') || 'auto';
+    applyTheme(currentSavedTheme);
+
+    function toggleSortOrder() {
+      currentSortOrder = (currentSortOrder === 'desc') ? 'asc' : 'desc';
+      
+      const sortBtn = document.getElementById('sortBtn');
+      if (currentSortOrder === 'desc') {
+        sortBtn.innerHTML = `<i data-lucide="arrow-down-wide-narrow" class="text-primary"></i> <span>最新月在前</span>`;
+      } else {
+        sortBtn.innerHTML = `<i data-lucide="arrow-up-narrow-wide" class="text-primary"></i> <span>最舊月在前</span>`;
+      }
+
+      renderHistoryList();
+    }
+
+    function handleTableSort(key) {
+      if (tableSortKey === key) {
+        tableSortOrder = (tableSortOrder === 'asc') ? 'desc' : 'asc';
+      } else {
+        tableSortKey = key;
+        tableSortOrder = (key === 'amount') ? 'desc' : 'asc';
+      }
+      renderHistoryList();
+    }
+
+    function getSortIconHtml(key) {
+      if (tableSortKey !== key) {
+        return `<i data-lucide="arrow-up-down" class="opacity-25 ms-1"></i>`;
+      }
+      return tableSortOrder === 'asc' 
+        ? `<i data-lucide="arrow-up" class="text-primary ms-1"></i>`
+        : `<i data-lucide="arrow-down" class="text-primary ms-1"></i>`;
+    }
+
+    function updateUIStats() {
+      document.getElementById('totalOwed').innerText = `NT$ ${currentTotalOwed.toLocaleString()}`;
+      document.getElementById('recordCount').innerText = `${globalHistoryData.length} 筆紀錄`;
+    }
+
+    function renderHistoryList() {
+      const accordionContainer = document.getElementById('monthlyHistoryAccordion');
+
+      const openCollapseIds = new Set();
+      document.querySelectorAll('#monthlyHistoryAccordion .accordion-collapse.show').forEach(el => {
+        openCollapseIds.add(el.id);
+      });
+
+      if (!globalHistoryData || globalHistoryData.length === 0) {
+        accordionContainer.innerHTML = `<div class="text-center text-sub py-5">目前尚無任何借還記錄</div>`;
+        return;
+      }
+
+      const groups = {};
+      globalHistoryData.forEach(item => {
+        const monthKey = item.date ? item.date.substring(0, 7) : '未知月份';
+        if (!groups[monthKey]) {
+          groups[monthKey] = [];
+        }
+        groups[monthKey].push(item);
+      });
+
+      const sortedMonthKeys = Object.keys(groups).sort((a, b) => {
+        return currentSortOrder === 'desc' ? b.localeCompare(a) : a.localeCompare(b);
+      });
+
+      accordionContainer.innerHTML = sortedMonthKeys.map((monthKey, index) => {
+        const monthItems = groups[monthKey];
+
+        monthItems.sort((a, b) => {
+          let valA = a[tableSortKey];
+          let valB = b[tableSortKey];
+
+          if (tableSortKey === 'amount') {
+            valA = Number(valA) || 0;
+            valB = Number(valB) || 0;
+          } else {
+            valA = String(valA || '');
+            valB = String(valB || '');
+          }
+
+          if (valA < valB) return tableSortOrder === 'asc' ? -1 : 1;
+          if (valA > valB) return tableSortOrder === 'asc' ? 1 : -1;
+          return 0;
+        });
+
+        let monthBorrowTotal = 0;
+        let monthRepayTotal = 0;
+
+        monthItems.forEach(item => {
+          const amt = Number(item.amount) || 0;
+          if (item.type === '借錢') monthBorrowTotal += amt;
+          if (item.type === '還錢') monthRepayTotal += amt;
+        });
+
+        const netChange = monthBorrowTotal - monthRepayTotal;
+        const collapseId = `collapse-${monthKey.replace('-', '')}`;
+        const headingId = `heading-${monthKey.replace('-', '')}`;
+
+        const isShow = openCollapseIds.size > 0 
+          ? openCollapseIds.has(collapseId) 
+          : (index === 0);
+
+        const [year, month] = monthKey.split('-');
+        const formattedMonthLabel = year && month ? `${year} 年 ${month} 月` : monthKey;
+
+        const tableRows = monthItems.map(item => {
+          const isBorrow = item.type === '借錢';
+          const amt = Number(item.amount) || 0;
+          return `
+            <tr>
+              <td class="text-nowrap text-sub" style="font-size:0.85rem;">${item.date}</td>
+              <td class="text-nowrap">
+                <span class="badge ${isBorrow ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success'} rounded-2 fw-normal">
+                  ${item.type}
+                </span>
+              </td>
+              <td class="fw-bold ${isBorrow ? 'text-danger' : 'text-success'} text-nowrap">
+                ${isBorrow ? '+' : '-'} NT$ ${amt.toLocaleString()}
+              </td>
+              <td class="text-sub text-nowrap">${item.note || '-'}</td>
+            </tr>
+          `;
+        }).join('');
+
+        return `
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="${headingId}">
+              <button class="accordion-button ${isShow ? '' : 'collapsed'} d-flex align-items-center justify-content-between pe-4" 
+                      type="button" 
+                      data-bs-toggle="collapse" 
+                      data-bs-target="#${collapseId}" 
+                      aria-expanded="${isShow ? 'true' : 'false'}" 
+                      aria-controls="${collapseId}">
+                <div class="d-flex align-items-center gap-2 flex-grow-1 me-2">
+                  <i data-lucide="calendar" class="text-primary"></i>
+                  <span class="fw-bold">${formattedMonthLabel}</span>
+                  <span class="badge bg-secondary-subtle text-secondary rounded-pill small ms-1">${monthItems.length} 筆</span>
+                </div>
+                
+                <div class="text-end me-2" style="font-size:0.85rem;">
+                  <span class="text-sub d-none d-sm-inline">當月淨變動：</span>
+                  <span class="fw-bold ${netChange > 0 ? 'text-danger' : (netChange < 0 ? 'text-success' : 'text-sub')}">
+                    ${netChange > 0 ? '+' : ''}${netChange.toLocaleString()}
+                  </span>
+                </div>
+              </button>
+            </h2>
+            <div id="${collapseId}" 
+                 class="accordion-collapse collapse ${isShow ? 'show' : ''}" 
+                 aria-labelledby="${headingId}">
+              <div class="accordion-body">
+                <div class="table-responsive">
+                  <table class="table table-custom align-middle">
+                    <thead>
+                      <tr>
+                        <th class="sortable text-nowrap text-center ${tableSortKey === 'date' ? 'active' : ''}" onclick="handleTableSort('date')">
+                          日期 ${getSortIconHtml('date')}
+                        </th>
+                        <th class="sortable text-nowrap text-center ${tableSortKey === 'type' ? 'active' : ''}" onclick="handleTableSort('type')">
+                          類型 ${getSortIconHtml('type')}
+                        </th>
+                        <th class="sortable text-nowrap text-center ${tableSortKey === 'amount' ? 'active' : ''}" onclick="handleTableSort('amount')">
+                          金額 ${getSortIconHtml('amount')}
+                        </th>
+                        <th style="min-width: 150px;" class="text-sub text-nowrap">備註</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${tableRows}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      refreshIcons();
+    }
+
+    function selectType(value, labelHtml) {
+      document.getElementById('type').value = value;
+      document.getElementById('typeDropdownLabel').innerHTML = labelHtml;
+      refreshIcons();
+    }
+
+    function getSwalStyle() {
+      const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+      return {
+        background: isDark ? '#121212' : '#ffffff',
+        color: isDark ? '#f1f5f9' : '#0f172a'
+      };
+    }
+
+    const alertIconMap = {
+      info: 'info',
+      warning: 'triangle-alert',
+      danger: 'octagon-alert',
+      success: 'check-circle',
+      primary: 'megaphone'
+    };
+
+    async function loadData(showLoading = true) {
+      const swalStyle = getSwalStyle();
+
+      if (showLoading) {
+        Swal.fire({
+          title: '資料同步中...',
+          background: swalStyle.background,
+          color: swalStyle.color,
+          allowOutsideClick: false,
+          heightAuto: false,
+          customClass: {
+            popup: 'swal-fullscreen-popup'
+          },
+          didOpen: () => Swal.showLoading()
+        });
+      }
+
+      try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+
+        const container = document.getElementById('announcementContainer');
+        if (data.announcements && data.announcements.length > 0) {
+          container.innerHTML = data.announcements.map((item) => {
+            const alertType = item.type || 'info';
+            const iconName = alertIconMap[alertType] || 'megaphone';
+
+            return `
+              <div class="alert alert-${alertType} alert-dismissible fade show m-0 rounded-3 d-flex align-items-center gap-2 border-0 shadow-sm" role="alert">
+                <i data-lucide="${iconName}" class="flex-shrink-0"></i>
+                <div class="flex-grow-1 fw-medium">${item.content}</div>
+              </div>
+            `;
+          }).join('');
+        } else {
+          container.innerHTML = '';
+        }
+
+        currentTotalOwed = data.totalOwed || 0;
+        globalHistoryData = data.history || [];
+
+        updateUIStats();
+        renderHistoryList();
+
+        if (showLoading) Swal.close();
+      } catch (err) {
+        // 💡 優化 1：連線失敗時加入「重新整理」按鈕
+        if (showLoading) {
+          Swal.fire({
+            icon: 'error',
+            title: '連線失敗',
+            text: '無法讀取後端資料庫。',
+            background: swalStyle.background,
+            color: swalStyle.color,
+            allowOutsideClick: false,
+            showConfirmButton: true,
+            confirmButtonText: '重新整理',
+            confirmButtonColor: '#2563eb',
+            heightAuto: false,
+            customClass: {
+              popup: 'swal-fullscreen-popup'
+            }
+          }).then((result) => {
+            if (result.isConfirmed) {
+              window.location.reload();
+            }
+          });
+        }
+        document.getElementById('monthlyHistoryAccordion').innerHTML = `<div class="text-center text-danger py-5">資料載入失敗</div>`;
+      }
+    }
+
+    document.getElementById('ledgerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const submitBtn = document.getElementById('submitBtn');
+      const amountVal = Number(document.getElementById('amount').value);
+      const typeVal = document.getElementById('type').value;
+      const dateVal = document.getElementById('date').value;
+      const noteVal = document.getElementById('note').value;
+
+      if (!amountVal || amountVal <= 0) return;
+
+      // 💡 優化 2：禁用按鈕防重複點擊，並更換為 Loading 提示
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> 處理中...`;
+
+      const newRecord = {
+        date: dateVal,
+        type: typeVal,
+        amount: amountVal,
+        note: noteVal
+      };
+
+      if (typeVal === '借錢') {
+        currentTotalOwed += amountVal;
+      } else if (typeVal === '還錢') {
+        currentTotalOwed -= amountVal;
+      }
+      globalHistoryData.unshift(newRecord);
+
+      updateUIStats();
+      renderHistoryList();
+
+      document.getElementById('amount').value = '';
+      document.getElementById('note').value = '';
+
+      const swalStyle = getSwalStyle();
+      Swal.fire({
+        icon: 'success',
+        title: '已記錄！',
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 1500,
+        background: swalStyle.background,
+        color: swalStyle.color
+      });
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify(newRecord)
+        });
+        const result = await res.json();
+
+        if (result.status !== 'success') {
+          throw new Error('寫入失敗');
+        }
+
+        await loadData(false);
+
+      } catch (err) {
+        Swal.fire({
+          icon: 'error',
+          title: '背景同步失敗',
+          text: '剛才新增的紀錄未成功寫入資料庫，請檢查網路連線。',
+          background: swalStyle.background,
+          color: swalStyle.color
+        });
+        await loadData(false);
+      } finally {
+        // 💡 優化 2：無論成功或失敗，請求結束後解除禁用並還原按鈕狀態
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<i data-lucide="send"></i> 送出紀錄`;
+        refreshIcons();
+      }
+    });
+
+    async function startApp() {
+      const swalStyle = getSwalStyle();
+
+      try {
+        await initConfig();
+        await loadData(true);
+      } catch (err) {
+        console.error("應用程式初始化失敗:", err.message);
+
+        // 💡 優化 1：初始化失敗時加入「重新整理」按鈕
+        Swal.fire({
+          icon: 'error',
+          title: '系統載入失敗',
+          text: err.message,
+          background: swalStyle.background,
+          color: swalStyle.color,
+          allowOutsideClick: false,
+          showConfirmButton: true,
+          confirmButtonText: '重新整理',
+          confirmButtonColor: '#2563eb',
+          heightAuto: false,
+          customClass: {
+            popup: 'swal-fullscreen-popup'
+          }
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.reload();
+          }
+        });
+
+        document.getElementById('monthlyHistoryAccordion').innerHTML = `
+          <div class="text-center text-danger py-5 fw-bold">
+            <i data-lucide="circle-alert" style="width: 2.5rem; height: 2.5rem;" class="d-block mx-auto mb-2"></i>
+            ${err.message}
+          </div>`;
+        refreshIcons();
+      }
+    }
+
+    startApp();
+  </script>
+</body>
+</html>
