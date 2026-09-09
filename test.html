@@ -33,6 +33,7 @@
       --accordion-btn-active-bg: #2a2a2a;
       --table-hover-bg: #262626;
       --th-hover-bg: 0;
+      --edit-cell-bg: #2d3748;
     }
     
     /* ☀️ 淺色模式 (Light Mode) */
@@ -50,6 +51,7 @@
       --accordion-btn-active-bg: #f1f5f9;
       --table-hover-bg: #f8fafc;
       --th-hover-bg: 0;
+      --edit-cell-bg: #f1f5f9;
     }
 
     html, body {
@@ -187,7 +189,25 @@
       vertical-align: middle;
       font-size: 0.95rem;
     }
+
+    /* ✏️ 編輯模式專屬樣式 */
+    body.is-edit-mode .editable-cell {
+      cursor: pointer;
+      outline: 1px dashed #3b82f6;
+      outline-offset: -2px;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
     
+    body.is-edit-mode .editable-cell:hover {
+      background-color: var(--edit-cell-bg) !important;
+    }
+
+    body.is-edit-mode .editable-cell:focus {
+      outline: 2px solid #2563eb;
+      background-color: var(--edit-cell-bg) !important;
+    }
+
     .table-custom tr:last-child td {
       border-bottom: none;
     }
@@ -196,7 +216,6 @@
       background-color: var(--table-hover-bg);
     }
 
-    /* 🖥️ 強制 SweetAlert2 滿版且零邊距 */
     .swal2-container {
       padding: 0 !important;
     }
@@ -215,7 +234,6 @@
       align-items: center !important;
     }
 
-    /* Lucide 尺寸對齊微調 */
     i[data-lucide] {
       width: 1.25rem;
       height: 1.25rem;
@@ -305,7 +323,6 @@
                     <button type="submit" class="btn btn-slate-primary w-100 py-2.5 rounded-3 d-flex align-items-center justify-content-center gap-2" id="submitBtn">
                       <i data-lucide="send"></i> 送出紀錄
                     </button>
-                    <!-- 按鈕正下方的提示訊息 -->
                     <div id="submitAlert" class="alert alert-success mt-2 mb-0 py-2 px-3 text-center rounded-3 d-none fade" role="alert" style="font-size: 0.9rem;">
                       <i data-lucide="check-circle" class="me-1"></i> 已記錄！
                     </div>
@@ -327,9 +344,16 @@
               <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2.5 py-1 fw-normal small" id="recordCount">0 筆</span>
             </div>
 
-            <button class="btn btn-sm btn-custom-dropdown rounded-pill px-3 py-1 d-flex align-items-center gap-1.5" onclick="toggleSortOrder()" id="sortBtn">
-              <i data-lucide="arrow-down-wide-narrow" class="text-primary"></i> <span id="sortLabel">最新月在前</span>
-            </button>
+            <div class="d-flex align-items-center gap-2">
+              <!-- ✏️ 切換編輯模式按鈕 -->
+              <button class="btn btn-sm btn-outline-warning rounded-pill px-3 py-1 d-flex align-items-center gap-1.5" onclick="toggleEditMode()" id="editModeBtn">
+                <i data-lucide="pencil" style="width: 1rem; height: 1rem;"></i> <span id="editModeLabel">編輯模式</span>
+              </button>
+
+              <button class="btn btn-sm btn-custom-dropdown rounded-pill px-3 py-1 d-flex align-items-center gap-1.5" onclick="toggleSortOrder()" id="sortBtn">
+                <i data-lucide="arrow-down-wide-narrow" class="text-primary"></i> <span id="sortLabel">最新月在前</span>
+              </button>
+            </div>
           </div>
 
           <div class="card-body p-4">
@@ -372,9 +396,9 @@
 
     let tableSortKey = 'date';
     let tableSortOrder = 'desc';
-    let adminPassword = null; // 暫存密碼
+    let adminPassword = null;
+    let isEditMode = false; // 編輯模式狀態標誌
 
-    // 取得使用者裝置本地時區日期
     function getLocalDateString() {
       const now = new Date();
       const year = now.getFullYear();
@@ -490,6 +514,29 @@
       document.getElementById('recordCount').innerText = `${globalHistoryData.length} 筆紀錄`;
     }
 
+    // ✏️ 切換編輯模式與密碼驗證
+    async function toggleEditMode() {
+      if (!isEditMode) {
+        const pwd = await getPasswordAuthorization();
+        if (!pwd) return;
+
+        isEditMode = true;
+        document.body.classList.add('is-edit-mode');
+        const btn = document.getElementById('editModeBtn');
+        btn.classList.remove('btn-outline-warning');
+        btn.classList.add('btn-warning');
+        document.getElementById('editModeLabel').innerText = '退出編輯';
+      } else {
+        isEditMode = false;
+        document.body.classList.remove('is-edit-mode');
+        const btn = document.getElementById('editModeBtn');
+        btn.classList.remove('btn-warning');
+        btn.classList.add('btn-outline-warning');
+        document.getElementById('editModeLabel').innerText = '編輯模式';
+      }
+      renderHistoryList();
+    }
+
     function renderHistoryList() {
       const accordionContainer = document.getElementById('monthlyHistoryAccordion');
 
@@ -505,7 +552,7 @@
 
       const groups = {};
       globalHistoryData.forEach((item, index) => {
-        item._originalIndex = index; // 記錄原始索引方便操作
+        item._originalIndex = index;
         const monthKey = item.date ? item.date.substring(0, 7) : '未知月份';
         if (!groups[monthKey]) {
           groups[monthKey] = [];
@@ -560,26 +607,34 @@
         const tableRows = monthItems.map(item => {
           const isBorrow = item.type === '借錢';
           const amt = Number(item.amount) || 0;
+          const editableAttr = isEditMode ? 'contenteditable="true"' : '';
+
           return `
-            <tr>
-              <td class="text-nowrap text-sub" style="font-size:0.85rem;">${item.date}</td>
+            <tr data-index="${item._originalIndex}">
+              <td class="text-nowrap text-sub editable-cell" ${editableAttr} data-field="date" onblur="handleCellBlur(this, ${item._originalIndex}, 'date')" style="font-size:0.85rem;">${item.date}</td>
               <td class="text-nowrap">
-                <span class="badge ${isBorrow ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success'} rounded-2 fw-normal">
-                  ${item.type}
-                </span>
+                ${isEditMode ? `
+                  <select class="form-select form-select-sm" onchange="handleTypeSelectChange(this, ${item._originalIndex})">
+                    <option value="借錢" ${item.type === '借錢' ? 'selected' : ''}>借錢</option>
+                    <option value="還錢" ${item.type === '還錢' ? 'selected' : ''}>還錢</option>
+                  </select>
+                ` : `
+                  <span class="badge ${isBorrow ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success'} rounded-2 fw-normal">
+                    ${item.type}
+                  </span>
+                `}
               </td>
-              <td class="fw-bold ${isBorrow ? 'text-danger' : 'text-success'} text-nowrap">
-                ${isBorrow ? '+' : '-'} NT$ ${amt.toLocaleString()}
+              <td class="fw-bold ${isBorrow ? 'text-danger' : 'text-success'} text-nowrap editable-cell" ${editableAttr} data-field="amount" onblur="handleCellBlur(this, ${item._originalIndex}, 'amount')">
+                ${amt}
               </td>
-              <td class="text-sub text-nowrap">${item.note || '-'}</td>
-              <td class="text-nowrap text-end">
-                <button class="btn btn-sm btn-link text-primary p-0 me-2" title="編輯" onclick="editRecord(${item._originalIndex})">
-                  <i data-lucide="pencil" style="width:1rem;height:1rem;"></i>
-                </button>
-                <button class="btn btn-sm btn-link text-danger p-0" title="刪除" onclick="deleteRecord(${item._originalIndex})">
-                  <i data-lucide="trash-2" style="width:1rem;height:1rem;"></i>
-                </button>
-              </td>
+              <td class="text-sub text-nowrap editable-cell" ${editableAttr} data-field="note" onblur="handleCellBlur(this, ${item._originalIndex}, 'note')">${item.note || ''}</td>
+              ${isEditMode ? `
+                <td class="text-nowrap text-end">
+                  <button class="btn btn-sm btn-link text-danger p-0" title="刪除" onclick="deleteRecord(${item._originalIndex})">
+                    <i data-lucide="trash-2" style="width:1rem;height:1rem;"></i>
+                  </button>
+                </td>
+              ` : '<td></td>'}
             </tr>
           `;
         }).join('');
@@ -625,7 +680,7 @@
                           金額 ${getSortIconHtml('amount')}
                         </th>
                         <th style="min-width: 120px;" class="text-sub text-nowrap">備註</th>
-                        <th class="text-end text-nowrap" style="width: 70px;">操作</th>
+                        <th class="text-end text-nowrap" style="width: 40px;"></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -642,6 +697,80 @@
       refreshIcons();
     }
 
+    // ✏️ 處理欄位離開焦點 (Blur) 的自動儲存
+    async function handleCellBlur(cell, index, field) {
+      if (!isEditMode) return;
+
+      const record = globalHistoryData[index];
+      if (!record) return;
+
+      let newValue = cell.innerText.trim();
+      if (field === 'amount') newValue = Number(newValue) || 0;
+
+      if (record[field] == newValue) return; // 未修改則退出
+
+      const updatedRecord = { ...record, [field]: newValue };
+      await saveRecordUpdate(index, updatedRecord);
+    }
+
+    // ✏️ 處理下拉選單修改類型
+    async function handleTypeSelectChange(selectEl, index) {
+      const record = globalHistoryData[index];
+      if (!record) return;
+
+      const newValue = selectEl.value;
+      if (record.type === newValue) return;
+
+      const updatedRecord = { ...record, type: newValue };
+      await saveRecordUpdate(index, updatedRecord);
+    }
+
+    // ✏️ 發送更新 API
+    async function saveRecordUpdate(index, record) {
+      const swalStyle = getSwalStyle();
+
+      try {
+        const payload = {
+          action: 'edit',
+          password: adminPassword,
+          index: index,
+          record: {
+            date: record.date,
+            type: record.type,
+            amount: Number(record.amount),
+            note: record.note
+          }
+        };
+
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        const result = await res.json();
+
+        if (result.status === 'error' && result.message === '密碼錯誤') {
+          adminPassword = null;
+          toggleEditMode();
+          throw new Error('密碼過期，請重新輸入。');
+        }
+
+        if (result.status !== 'success') {
+          throw new Error('更新失敗');
+        }
+
+        await loadData(false);
+      } catch (err) {
+        Swal.fire({
+          icon: 'error',
+          title: '修改失敗',
+          text: err.message,
+          background: swalStyle.background,
+          color: swalStyle.color
+        });
+        renderHistoryList();
+      }
+    }
+
     function selectType(value, labelHtml) {
       document.getElementById('type').value = value;
       document.getElementById('typeDropdownLabel').innerHTML = labelHtml;
@@ -656,7 +785,6 @@
       };
     }
 
-    // 驗證管理員密碼
     async function getPasswordAuthorization() {
       if (adminPassword) return adminPassword;
 
@@ -681,110 +809,6 @@
       return null;
     }
 
-    // 編輯紀錄
-    async function editRecord(index) {
-      const record = globalHistoryData[index];
-      if (!record) return;
-
-      const pwd = await getPasswordAuthorization();
-      if (!pwd) return;
-
-      const swalStyle = getSwalStyle();
-
-      const { value: formValues } = await Swal.fire({
-        title: '編輯紀錄',
-        html: `
-          <div class="text-start mb-2">
-            <label class="form-label small">日期</label>
-            <input id="swal-input-date" class="swal2-input m-0 w-100" type="date" value="${record.date}">
-          </div>
-          <div class="text-start mb-2">
-            <label class="form-label small">類型</label>
-            <select id="swal-input-type" class="swal2-select m-0 w-100" style="display:flex;">
-              <option value="借錢" ${record.type === '借錢' ? 'selected' : ''}>借錢</option>
-              <option value="還錢" ${record.type === '還錢' ? 'selected' : ''}>還錢</option>
-            </select>
-          </div>
-          <div class="text-start mb-2">
-            <label class="form-label small">金額 (NT$)</label>
-            <input id="swal-input-amount" class="swal2-input m-0 w-100" type="number" min="1" value="${record.amount}">
-          </div>
-          <div class="text-start mb-2">
-            <label class="form-label small">備註</label>
-            <input id="swal-input-note" class="swal2-input m-0 w-100" type="text" value="${record.note || ''}">
-          </div>
-        `,
-        focusConfirm: false,
-        showCancelButton: true,
-        confirmButtonText: '儲存修改',
-        cancelButtonText: '取消',
-        confirmButtonColor: '#2563eb',
-        background: swalStyle.background,
-        color: swalStyle.color,
-        preConfirm: () => {
-          return {
-            date: document.getElementById('swal-input-date').value,
-            type: document.getElementById('swal-input-type').value,
-            amount: Number(document.getElementById('swal-input-amount').value),
-            note: document.getElementById('swal-input-note').value
-          };
-        }
-      });
-
-      if (!formValues) return;
-
-      Swal.fire({
-        title: '更新中...',
-        background: swalStyle.background,
-        color: swalStyle.color,
-        allowOutsideClick: false,
-        didOpen: () => Swal.showLoading()
-      });
-
-      try {
-        const payload = {
-          action: 'edit',
-          password: pwd,
-          index: index,
-          record: formValues
-        };
-
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          body: JSON.stringify(payload)
-        });
-        const result = await res.json();
-
-        if (result.status === 'error' && result.message === '密碼錯誤') {
-          adminPassword = null;
-          throw new Error('密碼錯誤！');
-        }
-
-        if (result.status !== 'success') {
-          throw new Error('修改失敗');
-        }
-
-        await loadData(false);
-        Swal.fire({
-          icon: 'success',
-          title: '修改成功',
-          timer: 1500,
-          showConfirmButton: false,
-          background: swalStyle.background,
-          color: swalStyle.color
-        });
-      } catch (err) {
-        Swal.fire({
-          icon: 'error',
-          title: '操作失敗',
-          text: err.message,
-          background: swalStyle.background,
-          color: swalStyle.color
-        });
-      }
-    }
-
-    // 刪除紀錄
     async function deleteRecord(index) {
       const record = globalHistoryData[index];
       if (!record) return;
