@@ -8,10 +8,13 @@
 
   <link rel="icon" type="image/png" href="https://dinhertw.github.io/money/icon.png">
   
+  <!-- Bootstrap 5.3 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   
+  <!-- Lucide Icons 套件 -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
+  <!-- SweetAlert2 彈出視窗套件 -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <style>
@@ -56,9 +59,9 @@
 
       /* UI Specific */
       --badge-lend-bg: #fce8e6;
-      --badge-lend-text: #dc2626; /* 借錢醒目紅 */
+      --badge-lend-text: #dc2626;
       --badge-repay-bg: #e6f4ea;
-      --badge-repay-text: #16a34a; /* 還錢醒目綠 */
+      --badge-repay-text: #16a34a;
       --amount-lend-text: #dc2626;
       --amount-repay-text: #16a34a;
     }
@@ -205,6 +208,12 @@
       border-radius: 6px;
     }
 
+    /* 寬度拉長的備註格子 */
+    .edit-note-input {
+      width: 100%;
+      min-width: 180px;
+    }
+
     tr.pending-deleted {
       opacity: 0.4;
       text-decoration: line-through;
@@ -219,7 +228,7 @@
       background-color: var(--table-hover-bg);
     }
 
-    /* 🏷️ 類型 Tag 專用字體顏色 (強調紅綠色) */
+    /* 🏷️ 類型 Tag 專用字體顏色 */
     .badge-lend {
       background-color: var(--badge-lend-bg);
       color: var(--badge-lend-text) !important;
@@ -293,21 +302,39 @@
 
   <div class="container flex-grow-1" style="max-width: 1000px;">
     
+    <!-- 頂部列：公告與右上角登入按鈕 -->
     <div class="d-flex justify-content-between align-items-center mb-3">
       <div class="fw-bold fs-5 text-primary d-flex align-items-center gap-2">
         <i data-lucide="calculator"></i> <span id="appTitle">帳務管理系統</span>
       </div>
       
-      <button class="btn btn-sm rounded-pill px-3 py-1.5 d-flex align-items-center gap-1.5 transition-all" id="authBtn" onclick="handleAuthAction()">
+      <!-- 右上角管理員登入/登出按鈕 -->
+      <button class="btn btn-sm rounded-pill px-3 py-1.5 d-flex align-items-center gap-1.5" id="authBtn" onclick="handleAuthAction()">
         <i data-lucide="lock" style="width:1rem; height:1rem;"></i>
-        <span id="authBtnText">管理員登入</span>
+        <span>管理員登入</span>
       </button>
     </div>
 
-    <div id="announcementContainer" class="d-flex flex-column gap-2 mb-4"></div>
-    <div id="announcementEditorContainer" class="mb-4 d-none"></div>
+    <!-- 公告展示區 -->
+    <div id="announcementContainer" class="d-flex flex-column gap-2 mb-3"></div>
+    
+    <!-- 📢 管理員公告編輯區 (登入後顯示) -->
+    <div id="announcementEditorCard" class="card slate-card mb-4 d-none">
+      <div class="card-header bg-transparent border-0 pt-3 px-4 pb-0 d-flex align-items-center justify-content-between">
+        <h6 class="card-title fw-bold m-0 d-flex align-items-center gap-2 text-warning">
+          <i data-lucide="megaphone"></i> 管理員公告設定
+        </h6>
+        <button class="btn btn-sm btn-outline-primary rounded-pill px-2.5 py-0.5" onclick="addAnnouncementRow()">
+          <i data-lucide="plus" style="width:0.85rem; height:0.85rem;"></i> 新增公告
+        </button>
+      </div>
+      <div class="card-body p-3">
+        <div id="announcementEditList" class="d-flex flex-column gap-2"></div>
+      </div>
+    </div>
 
     <div class="row g-4">
+      <!-- 左側：待還總金額 & 新增紀錄 -->
       <div class="col-12 col-lg-5">
         <div class="d-flex flex-column gap-3 sticky-lg-top" style="top: 1.5rem; z-index: 10;">
           <div class="card slate-card hero-card p-3">
@@ -379,6 +406,7 @@
         </div>
       </div>
 
+      <!-- 右側：歷史紀錄清單 -->
       <div class="col-12 col-lg-7">
         <div class="card slate-card">
           <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0 d-flex align-items-center justify-content-between flex-wrap gap-2">
@@ -390,12 +418,13 @@
             </div>
 
             <div class="d-flex align-items-center gap-2">
+              <!-- 同步儲存按鈕 -->
               <button class="btn btn-sm btn-success rounded-pill px-3 py-1 d-none align-items-center gap-1.5" onclick="batchSyncChanges()" id="saveChangesBtn">
                 <i data-lucide="save" style="width: 1rem; height: 1rem;"></i> 儲存變更
               </button>
 
               <button class="btn btn-sm btn-custom-dropdown rounded-pill px-3 py-1 d-flex align-items-center gap-1.5" onclick="toggleSortOrder()" id="sortBtn">
-                <i data-lucide="arrow-down-wide-narrow" class="text-primary"></i> <span id="sortLabel">最新月在前</span>
+                <i data-lucide="arrow-down-wide-narrow" class="text-primary"></i> <span>最新月在前</span>
               </button>
             </div>
           </div>
@@ -429,10 +458,11 @@
     </div>
   </footer>
 
+  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbxP0BpEun_t9OWNh0J0SrybPkkkb83a4QiKdEN6UHjwLziHjdwcQhGYAu0e67DCDdJt5w/exec"; 
+    const API_URL = "YOUR_FIXED_GAS_DEPLOYMENT_URL_HERE"; 
     
     let currentSheetName = null;
     let globalHistoryData = [];
@@ -443,7 +473,7 @@
     let tableSortKey = 'date';
     let tableSortOrder = 'desc';
     
-    // 🔐 管理員權限狀態與持久化儲存
+    // 🔐 管理員權限狀態
     let adminPassword = localStorage.getItem('admin_pwd') || null;
     let isLoggedIn = !!adminPassword;
     let pendingChanges = new Map();
@@ -505,33 +535,38 @@
 
     applyTheme(localStorage.getItem('user-theme') || 'auto');
 
-    // 🔐 登入/登出狀態維護
+    // 🔐 登入/登出 UI 切換
     function updateAuthUI() {
       const authBtn = document.getElementById('authBtn');
       const saveBtn = document.getElementById('saveChangesBtn');
-    
+      const annCard = document.getElementById('announcementEditorCard');
+
       if (isLoggedIn) {
         authBtn.className = "btn btn-sm btn-outline-danger rounded-pill px-3 py-1.5 d-flex align-items-center gap-1.5";
         authBtn.innerHTML = `<i data-lucide="log-out" style="width:1rem; height:1rem;"></i> <span>登出管理員</span>`;
         
         saveBtn.classList.remove('d-none');
         saveBtn.classList.add('d-flex');
+
+        annCard.classList.remove('d-none');
       } else {
         authBtn.className = "btn btn-sm btn-outline-primary rounded-pill px-3 py-1.5 d-flex align-items-center gap-1.5";
         authBtn.innerHTML = `<i data-lucide="lock" style="width:1rem; height:1rem;"></i> <span>管理員登入</span>`;
         
         saveBtn.classList.add('d-none');
         saveBtn.classList.remove('d-flex');
+
+        annCard.classList.add('d-none');
       }
       
       refreshIcons();
       renderAnnouncements();
+      renderAnnouncementEditor();
       renderHistoryList();
     }
 
     async function handleAuthAction() {
       if (isLoggedIn) {
-        // 執行登出
         adminPassword = null;
         isLoggedIn = false;
         localStorage.removeItem('admin_pwd');
@@ -548,7 +583,6 @@
           color: swalStyle.color
         });
       } else {
-        // 執行登入
         const pwd = await getPasswordAuthorization();
         if (pwd) {
           adminPassword = pwd;
@@ -582,6 +616,16 @@
       renderHistoryList();
     }
 
+    function handleTableSort(key) {
+      if (tableSortKey === key) {
+        tableSortOrder = (tableSortOrder === 'asc') ? 'desc' : 'asc';
+      } else {
+        tableSortKey = key;
+        tableSortOrder = (key === 'amount') ? 'desc' : 'asc';
+      }
+      renderHistoryList();
+    }
+
     function getSortIconHtml(key) {
       if (tableSortKey !== key) {
         return `<i data-lucide="arrow-up-down" class="opacity-25 ms-1" style="width:0.85rem; height:0.85rem;"></i>`;
@@ -605,7 +649,7 @@
       if (totalTasks === 0) {
         Swal.fire({
           icon: 'info',
-          title: '無變更需要儲存',
+          title: '無歷史變更需要儲存',
           timer: 1200,
           showConfirmButton: false,
           background: swalStyle.background,
@@ -687,7 +731,7 @@
       }
     }
 
-    // 📢 渲染公告 (支援編輯與一般展示)
+    // 📢 渲染與編輯公告
     const alertIconMap = {
       info: 'info',
       warning: 'triangle-alert',
@@ -716,6 +760,59 @@
       }).join('');
 
       refreshIcons();
+    }
+
+    // ✏️ 渲染公告編輯器 (管理員專用)
+    function renderAnnouncementEditor() {
+      if (!isLoggedIn) return;
+
+      const editList = document.getElementById('announcementEditList');
+      if (!globalAnnouncements || globalAnnouncements.length === 0) {
+        editList.innerHTML = `<div class="text-sub small text-center py-2">目前尚無公告，可點選上方「新增公告」</div>`;
+        return;
+      }
+
+      editList.innerHTML = globalAnnouncements.map((item, idx) => `
+        <div class="d-flex align-items-center gap-2">
+          <input type="text" class="form-control form-control-sm rounded-2 flex-grow-1" 
+                 value="${item.content || ''}" 
+                 placeholder="公告內容" 
+                 onchange="updateAnnouncementItem(${idx}, 'content', this.value)">
+                 
+          <select class="form-select form-select-sm rounded-2" style="width: 100px;" 
+                  onchange="updateAnnouncementItem(${idx}, 'type', this.value)">
+            <option value="info" ${item.type === 'info' ? 'selected' : ''}>提示 (藍)</option>
+            <option value="warning" ${item.type === 'warning' ? 'selected' : ''}>警告 (黃)</option>
+            <option value="danger" ${item.type === 'danger' ? 'selected' : ''}>緊急 (紅)</option>
+            <option value="success" ${item.type === 'success' ? 'selected' : ''}>成功 (綠)</option>
+          </select>
+
+          <button class="btn btn-sm btn-link text-danger p-0 ms-1" onclick="deleteAnnouncementItem(${idx})" title="刪除公告">
+            <i data-lucide="trash-2" style="width:1rem;height:1rem;"></i>
+          </button>
+        </div>
+      `).join('');
+
+      refreshIcons();
+    }
+
+    function updateAnnouncementItem(index, field, value) {
+      if (globalAnnouncements[index]) {
+        globalAnnouncements[index][field] = value;
+        renderAnnouncements();
+      }
+    }
+
+    function addAnnouncementRow() {
+      globalAnnouncements.push({ content: "新公告內容", type: "info" });
+      renderAnnouncements();
+      renderAnnouncementEditor();
+    }
+
+    function deleteAnnouncementItem(index) {
+      globalAnnouncements.splice(index, 1);
+      renderAnnouncements();
+      renderAnnouncementEditor();
     }
 
     // 📜 渲染歷史紀錄清單
@@ -793,17 +890,17 @@
           const formattedAmt = `${isBorrow ? '+' : '-'} NT$ ${amt.toLocaleString()}`;
           const isPendingDeleted = pendingChanges.get(origIdx)?.action === 'delete';
 
-          // ✏️ 登入後：顯示可編輯欄位
+          // ✏️ 登入後：顯示可編輯欄位 (備註框加長)
           if (isLoggedIn) {
             return `
               <tr class="${isPendingDeleted ? 'pending-deleted' : ''}">
-                <td style="width: 140px;" class="text-center">
+                <td style="width: 130px;" class="text-center">
                   <input type="date" class="form-control form-control-sm edit-input-sm text-center" 
                          value="${item.date}" 
                          onchange="handleInputChange(${origIdx}, 'date', this.value)" 
                          ${isPendingDeleted ? 'disabled' : ''}>
                 </td>
-                <td style="width: 100px;" class="text-center">
+                <td style="width: 90px;" class="text-center">
                   <select class="form-select form-select-sm edit-input-sm text-center fw-bold ${isBorrow ? 'text-danger' : 'text-success'}" 
                           onchange="handleInputChange(${origIdx}, 'type', this.value)"
                           ${isPendingDeleted ? 'disabled' : ''}>
@@ -811,15 +908,15 @@
                     <option value="還錢" class="text-success fw-bold" ${item.type === '還錢' ? 'selected' : ''}>還錢</option>
                   </select>
                 </td>
-                <td style="width: 130px;" class="text-center">
+                <td style="width: 110px;" class="text-center">
                   <input type="number" class="form-control form-control-sm edit-input-sm text-center fw-bold ${isBorrow ? 'text-danger' : 'text-success'}" 
                          value="${amt}" min="1" 
                          onchange="handleInputChange(${origIdx}, 'amount', this.value)" 
                          ${isPendingDeleted ? 'disabled' : ''}>
                 </td>
                 <td class="text-start">
-                  <input type="text" class="form-control form-control-sm edit-input-sm" 
-                         value="${item.note || ''}" placeholder="備註" 
+                  <input type="text" class="form-control form-control-sm edit-input-sm edit-note-input" 
+                         value="${item.note || ''}" placeholder="備註說明" 
                          onchange="handleInputChange(${origIdx}, 'note', this.value)" 
                          ${isPendingDeleted ? 'disabled' : ''}>
                 </td>
@@ -834,7 +931,7 @@
             `;
           }
 
-          // 👁️ 未登入：一般檢視 (標題與前三欄位置中，備註靠左)
+          // 👁️ 未登入：一般檢視
           return `
             <tr>
               <td class="text-nowrap text-sub text-center" style="width: 25%; font-size:0.9rem;">${item.date}</td>
@@ -882,16 +979,16 @@
                   <table class="table table-custom align-middle">
                     <thead>
                       <tr>
-                        <th class="sortable text-nowrap text-center ${tableSortKey === 'date' ? 'active' : ''}" style="width: 25%;" onclick="handleTableSort('date')">
+                        <th class="sortable text-nowrap text-center ${tableSortKey === 'date' ? 'active' : ''}" style="width: 130px;" onclick="handleTableSort('date')">
                           日期 ${getSortIconHtml('date')}
                         </th>
-                        <th class="sortable text-nowrap text-center ${tableSortKey === 'type' ? 'active' : ''}" style="width: 20%;" onclick="handleTableSort('type')">
+                        <th class="sortable text-nowrap text-center ${tableSortKey === 'type' ? 'active' : ''}" style="width: 90px;" onclick="handleTableSort('type')">
                           類型 ${getSortIconHtml('type')}
                         </th>
-                        <th class="sortable text-nowrap text-center ${tableSortKey === 'amount' ? 'active' : ''}" style="width: 25%;" onclick="handleTableSort('amount')">
+                        <th class="sortable text-nowrap text-center ${tableSortKey === 'amount' ? 'active' : ''}" style="width: 110px;" onclick="handleTableSort('amount')">
                           金額 ${getSortIconHtml('amount')}
                         </th>
-                        <th style="width: 30%;" class="text-sub text-nowrap text-start">備註</th>
+                        <th class="text-sub text-nowrap text-start">備註</th>
                         ${isLoggedIn ? '<th style="width: 40px;" class="text-center">操作</th>' : ''}
                       </tr>
                     </thead>
