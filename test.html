@@ -345,7 +345,6 @@
             </div>
 
             <div class="d-flex align-items-center gap-2">
-              <!-- ✏️ 切換編輯模式按鈕 -->
               <button class="btn btn-sm btn-outline-warning rounded-pill px-3 py-1 d-flex align-items-center gap-1.5" onclick="toggleEditMode()" id="editModeBtn">
                 <i data-lucide="pencil" style="width: 1rem; height: 1rem;"></i> <span id="editModeLabel">編輯模式</span>
               </button>
@@ -397,7 +396,8 @@
     let tableSortKey = 'date';
     let tableSortOrder = 'desc';
     let adminPassword = null;
-    let isEditMode = false; // 編輯模式狀態標誌
+    let isEditMode = false;
+    let pendingChanges = new Map(); // 記錄修改過的索引與資料：Map<index, updatedRecord>
 
     function getLocalDateString() {
       const now = new Date();
@@ -514,27 +514,109 @@
       document.getElementById('recordCount').innerText = `${globalHistoryData.length} 筆紀錄`;
     }
 
-    // ✏️ 切換編輯模式與密碼驗證
+    // ✏️ 切換編輯模式與退出時回存
     async function toggleEditMode() {
       if (!isEditMode) {
         const pwd = await getPasswordAuthorization();
         if (!pwd) return;
 
         isEditMode = true;
+        pendingChanges.clear(); // 清空暫存
         document.body.classList.add('is-edit-mode');
         const btn = document.getElementById('editModeBtn');
         btn.classList.remove('btn-outline-warning');
         btn.classList.add('btn-warning');
         document.getElementById('editModeLabel').innerText = '退出編輯';
+        renderHistoryList();
       } else {
+        // 退出編輯模式：如有修改資料則跳出 Swal 批次同步
+        if (pendingChanges.size > 0) {
+          await batchSyncChanges();
+        } else {
+          isEditMode = false;
+          document.body.classList.remove('is-edit-mode');
+          const btn = document.getElementById('editModeBtn');
+          btn.classList.remove('btn-warning');
+          btn.classList.add('btn-outline-warning');
+          document.getElementById('editModeLabel').innerText = '編輯模式';
+          renderHistoryList();
+        }
+      }
+    }
+
+    // 🔄 批次回存修改至 GAS
+    async function batchSyncChanges() {
+      const swalStyle = getSwalStyle();
+      const totalTasks = pendingChanges.size;
+
+      Swal.fire({
+        title: '同步修訂資料中...',
+        html: `正在寫入 <b>${totalTasks}</b> 筆異動，請稍候...`,
+        background: swalStyle.background,
+        color: swalStyle.color,
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
+
+      try {
+        // 依序處理排隊的異動（避免併發造成 GAS 鎖定）
+        for (const [index, record] of pendingChanges.entries()) {
+          const payload = {
+            action: 'edit',
+            password: adminPassword,
+            index: index,
+            record: {
+              date: record.date,
+              type: record.type,
+              amount: Number(record.amount),
+              note: record.note
+            }
+          };
+
+          const res = await fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+          const result = await res.json();
+
+          if (result.status === 'error' && result.message === '密碼錯誤') {
+            adminPassword = null;
+            throw new Error('密碼過期，請重新驗證。');
+          }
+
+          if (result.status !== 'success') {
+            throw new Error(`索引 #${index} 儲存失敗`);
+          }
+        }
+
+        pendingChanges.clear();
         isEditMode = false;
         document.body.classList.remove('is-edit-mode');
         const btn = document.getElementById('editModeBtn');
         btn.classList.remove('btn-warning');
         btn.classList.add('btn-outline-warning');
         document.getElementById('editModeLabel').innerText = '編輯模式';
+
+        await loadData(false);
+
+        Swal.fire({
+          icon: 'success',
+          title: '已同步完成！',
+          timer: 1500,
+          showConfirmButton: false,
+          background: swalStyle.background,
+          color: swalStyle.color
+        });
+
+      } catch (err) {
+        Swal.fire({
+          icon: 'error',
+          title: '同步失敗',
+          text: err.message,
+          background: swalStyle.background,
+          color: swalStyle.color
+        });
       }
-      renderHistoryList();
     }
 
     function renderHistoryList() {
@@ -697,8 +779,8 @@
       refreshIcons();
     }
 
-    // ✏️ 處理欄位離開焦點 (Blur) 的自動儲存
-    async function handleCellBlur(cell, index, field) {
+    // ✏️ 欄位離開焦點 (Blur) 時僅更新本地暫存
+    function handleCellBlur(cell, index, field) {
       if (!isEditMode) return;
 
       const record = globalHistoryData[index];
@@ -707,68 +789,28 @@
       let newValue = cell.innerText.trim();
       if (field === 'amount') newValue = Number(newValue) || 0;
 
-      if (record[field] == newValue) return; // 未修改則退出
+      if (record[field] == newValue) return;
 
-      const updatedRecord = { ...record, [field]: newValue };
-      await saveRecordUpdate(index, updatedRecord);
+      const currentPending = pendingChanges.get(index) || { ...record };
+      currentPending[field] = newValue;
+
+      pendingChanges.set(index, currentPending);
+      globalHistoryData[index][field] = newValue; // 更新前端顯示記憶體
     }
 
-    // ✏️ 處理下拉選單修改類型
-    async function handleTypeSelectChange(selectEl, index) {
+    // ✏️ 下拉選單切換類型僅更新本地暫存
+    function handleTypeSelectChange(selectEl, index) {
       const record = globalHistoryData[index];
       if (!record) return;
 
       const newValue = selectEl.value;
       if (record.type === newValue) return;
 
-      const updatedRecord = { ...record, type: newValue };
-      await saveRecordUpdate(index, updatedRecord);
-    }
+      const currentPending = pendingChanges.get(index) || { ...record };
+      currentPending.type = newValue;
 
-    // ✏️ 發送更新 API
-    async function saveRecordUpdate(index, record) {
-      const swalStyle = getSwalStyle();
-
-      try {
-        const payload = {
-          action: 'edit',
-          password: adminPassword,
-          index: index,
-          record: {
-            date: record.date,
-            type: record.type,
-            amount: Number(record.amount),
-            note: record.note
-          }
-        };
-
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          body: JSON.stringify(payload)
-        });
-        const result = await res.json();
-
-        if (result.status === 'error' && result.message === '密碼錯誤') {
-          adminPassword = null;
-          toggleEditMode();
-          throw new Error('密碼過期，請重新輸入。');
-        }
-
-        if (result.status !== 'success') {
-          throw new Error('更新失敗');
-        }
-
-        await loadData(false);
-      } catch (err) {
-        Swal.fire({
-          icon: 'error',
-          title: '修改失敗',
-          text: err.message,
-          background: swalStyle.background,
-          color: swalStyle.color
-        });
-        renderHistoryList();
-      }
+      pendingChanges.set(index, currentPending);
+      globalHistoryData[index].type = newValue;
     }
 
     function selectType(value, labelHtml) {
@@ -862,7 +904,9 @@
           throw new Error('刪除失敗');
         }
 
+        pendingChanges.delete(index); // 若暫存有此筆則刪除
         await loadData(false);
+
         Swal.fire({
           icon: 'success',
           title: '已刪除紀錄',
