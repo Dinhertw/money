@@ -508,22 +508,22 @@
     // 🔐 登入/登出狀態維護
     function updateAuthUI() {
       const authBtn = document.getElementById('authBtn');
-      const authBtnText = document.getElementById('authBtnText');
       const saveBtn = document.getElementById('saveChangesBtn');
-
+    
       if (isLoggedIn) {
         authBtn.className = "btn btn-sm btn-outline-danger rounded-pill px-3 py-1.5 d-flex align-items-center gap-1.5";
-        authBtnText.innerText = "登出管理員";
-        authBtn.querySelector('i').setAttribute('data-lucide', 'log-out');
+        authBtn.innerHTML = `<i data-lucide="log-out" style="width:1rem; height:1rem;"></i> <span>登出管理員</span>`;
+        
         saveBtn.classList.remove('d-none');
         saveBtn.classList.add('d-flex');
       } else {
         authBtn.className = "btn btn-sm btn-outline-primary rounded-pill px-3 py-1.5 d-flex align-items-center gap-1.5";
-        authBtnText.innerText = "管理員登入";
-        authBtn.querySelector('i').setAttribute('data-lucide', 'lock');
+        authBtn.innerHTML = `<i data-lucide="lock" style="width:1rem; height:1rem;"></i> <span>管理員登入</span>`;
+        
         saveBtn.classList.add('d-none');
         saveBtn.classList.remove('d-flex');
       }
+      
       refreshIcons();
       renderAnnouncements();
       renderHistoryList();
@@ -573,19 +573,12 @@
     function toggleSortOrder() {
       currentSortOrder = (currentSortOrder === 'desc') ? 'asc' : 'desc';
       const sortBtn = document.getElementById('sortBtn');
+      
       sortBtn.innerHTML = (currentSortOrder === 'desc') 
         ? `<i data-lucide="arrow-down-wide-narrow" class="text-primary"></i> <span>最新月在前</span>`
         : `<i data-lucide="arrow-up-narrow-wide" class="text-primary"></i> <span>最舊月在前</span>`;
-      renderHistoryList();
-    }
-
-    function handleTableSort(key) {
-      if (tableSortKey === key) {
-        tableSortOrder = (tableSortOrder === 'asc') ? 'desc' : 'asc';
-      } else {
-        tableSortKey = key;
-        tableSortOrder = (key === 'amount') ? 'desc' : 'asc';
-      }
+        
+      refreshIcons();
       renderHistoryList();
     }
 
