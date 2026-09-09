@@ -33,6 +33,14 @@
       --accordion-btn-active-bg: #2a2a2a;
       --table-hover-bg: #262626;
       --th-hover-bg: 0;
+
+      /* UI Specific */
+      --badge-lend-bg: rgba(224, 86, 105, 0.2);
+      --badge-lend-text: #f87171;
+      --badge-repay-bg: rgba(40, 167, 69, 0.2);
+      --badge-repay-text: #4ade80;
+      --amount-lend-text: #f87171;
+      --amount-repay-text: #34d399;
     }
     
     /* ☀️ 淺色模式 (Light Mode) */
@@ -47,9 +55,17 @@
       --hero-title: #1e3a8a;
       --date-picker-filter: none;
       --accordion-btn-bg: #ffffff;
-      --accordion-btn-active-bg: #f1f5f9;
+      --accordion-btn-active-bg: #f8fafc;
       --table-hover-bg: #f8fafc;
       --th-hover-bg: 0;
+
+      /* UI Specific */
+      --badge-lend-bg: #fce8e6;
+      --badge-lend-text: #e53e3e;
+      --badge-repay-bg: #e6f4ea;
+      --badge-repay-text: #2e7d32;
+      --amount-lend-text: #d93025;
+      --amount-repay-text: #1e8e3e;
     }
 
     html, body {
@@ -65,7 +81,7 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      font-family: system-ui, -apple-system, sans-serif;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
       transition: background-color 0.2s, color 0.2s;
       padding-top: 1.5rem !important;
       padding-bottom: 1.5rem !important;
@@ -158,32 +174,31 @@
     }
     
     .table-custom th {
-      background-color: var(--input-bg);
-      color: var(--text-secondary);
-      font-weight: 600;
-      font-size: 0.85rem;
+      background-color: transparent;
+      color: #64748b;
+      font-weight: 500;
+      font-size: 0.9rem;
       border-bottom: 1px solid var(--card-border);
-      padding: 0.75rem 1rem;
+      padding: 0.8rem 1rem;
       user-select: none;
     }
     
     .table-custom th.sortable {
       cursor: pointer;
-      transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+      transition: color 0.15s ease-in-out;
     }
     
     .table-custom th.sortable:hover {
-      background-color: var(--th-hover-bg);
       color: var(--text-primary);
     }
     
     .table-custom th.sortable.active {
-      color: #60a5fa;
+      color: #3b82f6;
     }
     
     .table-custom td {
       border-bottom: 1px solid var(--card-border);
-      padding: 0.6rem 0.75rem;
+      padding: 0.9rem 1rem;
       vertical-align: middle;
       font-size: 0.95rem;
     }
@@ -208,6 +223,33 @@
       background-color: var(--table-hover-bg);
     }
 
+    /* 🏷️ 類型 Tag 專用樣式 */
+    .badge-lend {
+      background-color: var(--badge-lend-bg);
+      color: var(--badge-lend-text);
+      font-weight: 500;
+      padding: 0.3em 0.7em;
+      border-radius: 6px;
+    }
+
+    .badge-repay {
+      background-color: var(--badge-repay-bg);
+      color: var(--badge-repay-text);
+      font-weight: 500;
+      padding: 0.3em 0.7em;
+      border-radius: 6px;
+    }
+
+    .amount-lend {
+      color: var(--amount-lend-text);
+      font-weight: 600;
+    }
+
+    .amount-repay {
+      color: var(--amount-repay-text);
+      font-weight: 600;
+    }
+
     .swal2-container {
       padding: 0 !important;
     }
@@ -216,7 +258,7 @@
       width: 100vw !important;
       height: 100vh !important;
       max-width: 100vw !important;
-      max-height: 100vh !important;
+      max-height: 100vw !important;
       border-radius: 0 !important;
       margin: 0 !important;
       padding: 0 !important;
@@ -477,11 +519,11 @@
 
     function getSortIconHtml(key) {
       if (tableSortKey !== key) {
-        return `<i data-lucide="arrow-up-down" class="opacity-25 ms-1"></i>`;
+        return `<i data-lucide="arrow-up-down" class="opacity-25 ms-1" style="width:0.85rem; height:0.85rem;"></i>`;
       }
       return tableSortOrder === 'asc' 
-        ? `<i data-lucide="arrow-up" class="text-primary ms-1"></i>`
-        : `<i data-lucide="arrow-down" class="text-primary ms-1"></i>`;
+        ? `<i data-lucide="arrow-up" class="text-primary ms-1" style="width:0.85rem; height:0.85rem;"></i>`
+        : `<i data-lucide="arrow-down" class="text-primary ms-1" style="width:0.85rem; height:0.85rem;"></i>`;
     }
 
     function updateUIStats() {
@@ -669,18 +711,19 @@
           const origIdx = item._originalIndex;
           const isBorrow = item.type === '借錢';
           const amt = Number(item.amount) || 0;
+          const formattedAmt = `${isBorrow ? '+' : '-'} NT$ ${amt.toLocaleString()}`;
           const isPendingDeleted = pendingChanges.get(origIdx)?.action === 'delete';
 
           if (isEditMode) {
             return `
               <tr class="${isPendingDeleted ? 'pending-deleted' : ''}">
-                <td style="width: 145px;">
+                <td style="width: 140px;">
                   <input type="date" class="form-control form-control-sm edit-input-sm" 
                          value="${item.date}" 
                          onchange="handleInputChange(${origIdx}, 'date', this.value)" 
                          ${isPendingDeleted ? 'disabled' : ''}>
                 </td>
-                <td style="width: 110px;">
+                <td style="width: 100px;">
                   <select class="form-select form-select-sm edit-input-sm" 
                           onchange="handleInputChange(${origIdx}, 'type', this.value)"
                           ${isPendingDeleted ? 'disabled' : ''}>
@@ -688,7 +731,7 @@
                     <option value="還錢" ${item.type === '還錢' ? 'selected' : ''}>還錢</option>
                   </select>
                 </td>
-                <td style="width: 110px;">
+                <td style="width: 130px;">
                   <input type="number" class="form-control form-control-sm edit-input-sm fw-bold ${isBorrow ? 'text-danger' : 'text-success'}" 
                          value="${amt}" min="1" 
                          onchange="handleInputChange(${origIdx}, 'amount', this.value)" 
@@ -713,17 +756,16 @@
 
           return `
             <tr>
-              <td class="text-nowrap text-sub" style="font-size:0.85rem;">${item.date}</td>
-              <td class="text-nowrap">
-                <span class="badge ${isBorrow ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success'} rounded-2 fw-normal">
+              <td class="text-nowrap text-sub" style="width: 25%; font-size:0.9rem;">${item.date}</td>
+              <td class="text-nowrap" style="width: 20%;">
+                <span class="${isBorrow ? 'badge-lend' : 'badge-repay'} fs-7">
                   ${item.type}
                 </span>
               </td>
-              <td class="fw-bold ${isBorrow ? 'text-danger' : 'text-success'} text-nowrap">
-                ${amt}
+              <td class="${isBorrow ? 'amount-lend' : 'amount-repay'} text-nowrap" style="width: 25%;">
+                ${formattedAmt}
               </td>
-              <td class="text-sub text-nowrap">${item.note || ''}</td>
-              <td></td>
+              <td class="text-sub text-nowrap" style="width: 30%; font-size:0.9rem;">${item.note || ''}</td>
             </tr>
           `;
         }).join('');
@@ -743,9 +785,9 @@
                   <span class="badge bg-secondary-subtle text-secondary rounded-pill small ms-1">${monthItems.length} 筆</span>
                 </div>
                 
-                <div class="text-end me-2" style="font-size:0.85rem;">
+                <div class="text-end me-2" style="font-size:0.9rem;">
                   <span class="text-sub d-none d-sm-inline">當月淨變動：</span>
-                  <span class="fw-bold ${netChange > 0 ? 'text-danger' : (netChange < 0 ? 'text-success' : 'text-sub')}">
+                  <span class="fw-bold ${netChange > 0 ? 'amount-lend' : (netChange < 0 ? 'amount-repay' : 'text-sub')}">
                     ${netChange > 0 ? '+' : ''}${netChange.toLocaleString()}
                   </span>
                 </div>
@@ -759,17 +801,17 @@
                   <table class="table table-custom align-middle">
                     <thead>
                       <tr>
-                        <th class="sortable text-nowrap text-center ${tableSortKey === 'date' ? 'active' : ''}" onclick="handleTableSort('date')">
+                        <th class="sortable text-nowrap ${tableSortKey === 'date' ? 'active' : ''}" style="width: 25%;" onclick="handleTableSort('date')">
                           日期 ${getSortIconHtml('date')}
                         </th>
-                        <th class="sortable text-nowrap text-center ${tableSortKey === 'type' ? 'active' : ''}" onclick="handleTableSort('type')">
+                        <th class="sortable text-nowrap ${tableSortKey === 'type' ? 'active' : ''}" style="width: 20%;" onclick="handleTableSort('type')">
                           類型 ${getSortIconHtml('type')}
                         </th>
-                        <th class="sortable text-nowrap text-center ${tableSortKey === 'amount' ? 'active' : ''}" onclick="handleTableSort('amount')">
+                        <th class="sortable text-nowrap ${tableSortKey === 'amount' ? 'active' : ''}" style="width: 25%;" onclick="handleTableSort('amount')">
                           金額 ${getSortIconHtml('amount')}
                         </th>
-                        <th style="min-width: 120px;" class="text-sub text-nowrap">備註</th>
-                        <th class="text-end text-nowrap" style="width: 40px;"></th>
+                        <th style="width: 30%;" class="text-sub text-nowrap">備註</th>
+                        ${isEditMode ? '<th style="width: 40px;"></th>' : ''}
                       </tr>
                     </thead>
                     <tbody>
