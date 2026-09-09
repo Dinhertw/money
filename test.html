@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-TW" data-bs-theme="light">
-
+  
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,7 +33,6 @@
       --accordion-btn-active-bg: #2a2a2a;
       --table-hover-bg: #262626;
       --th-hover-bg: 0;
-      --modal-bg: #1e1e1e;
     }
     
     /* ☀️ 淺色模式 (Light Mode) */
@@ -51,7 +50,6 @@
       --accordion-btn-active-bg: #f1f5f9;
       --table-hover-bg: #f8fafc;
       --th-hover-bg: 0;
-      --modal-bg: #ffffff;
     }
 
     html, body {
@@ -121,13 +119,9 @@
       color: #ffffff;
     }
     
-    .dropdown-menu, .modal-content {
+    .dropdown-menu {
       background-color: var(--card-bg) !important;
       border: 1px solid var(--card-border) !important;
-      color: var(--text-primary) !important;
-    }
-    
-    .dropdown-menu {
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
     }
     
@@ -243,35 +237,11 @@
         overflow-y: visible !important;
       }
     }
-
-    .admin-badge {
-      font-size: 0.75rem;
-      padding: 0.25rem 0.6rem;
-      border-radius: 20px;
-    }
   </style>
 </head>
 <body>
 
   <div class="container flex-grow-1" style="max-width: 1000px;">
-    
-    <!-- 頁頭頂部控制列：顯示管理模式與設定按鈕 -->
-    <div class="d-flex align-items-center justify-content-between mb-3 px-1">
-      <div class="d-flex align-items-center gap-2">
-        <h4 class="fw-bold m-0" id="appHeaderTitle">帳務管理系統</h4>
-        <span id="adminStatusBadge" class="badge bg-secondary-subtle text-secondary admin-badge">一般檢視</span>
-      </div>
-      
-      <div class="d-flex gap-2">
-        <button class="btn btn-sm btn-custom-dropdown rounded-3 d-flex align-items-center gap-1.5" id="adminAuthBtn" onclick="toggleAdminAuth()">
-          <i data-lucide="lock" class="text-primary"></i> <span id="adminAuthBtnText">管理員驗證</span>
-        </button>
-        <button class="btn btn-sm btn-custom-dropdown rounded-3 d-flex align-items-center gap-1.5 d-none" id="settingsBtn" onclick="openSettingsModal()">
-          <i data-lucide="settings" class="text-primary"></i> <span>系統設定</span>
-        </button>
-      </div>
-    </div>
-
     <div id="announcementContainer" class="d-flex flex-column gap-2 mb-4"></div>
 
     <div class="row g-4">
@@ -374,112 +344,6 @@
     </div>
   </div>
 
-  <!-- 📝 紀錄編輯 Modal -->
-  <div class="modal fade" id="editRecordModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content slate-card rounded-4 shadow-lg border-0">
-        <div class="modal-header border-bottom border-secondary-subtle p-4">
-          <h5 class="modal-title fw-bold d-flex align-items-center gap-2">
-            <i data-lucide="edit-3" class="text-primary"></i> 編輯紀錄
-          </h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body p-4">
-          <form id="editRecordForm">
-            <input type="hidden" id="editIndex">
-            <div class="row g-3">
-              <div class="col-6">
-                <label for="editDate" class="form-label small">日期</label>
-                <input type="date" class="form-control rounded-3" id="editDate" required>
-              </div>
-              <div class="col-6">
-                <label for="editType" class="form-label small">類型</label>
-                <select class="form-select rounded-3" id="editType" required>
-                  <option value="借錢">借錢</option>
-                  <option value="還錢">還錢</option>
-                </select>
-              </div>
-              <div class="col-12">
-                <label for="editAmount" class="form-label small">金額 (NT$)</label>
-                <input type="number" class="form-control rounded-3" id="editAmount" min="1" required>
-              </div>
-              <div class="col-12">
-                <label for="editNote" class="form-label small">備註說明</label>
-                <input type="text" class="form-control rounded-3" id="editNote" placeholder="備註內容">
-              </div>
-            </div>
-            <div class="d-flex justify-content-end gap-2 mt-4">
-              <button type="button" class="btn btn-secondary rounded-3 px-3" data-bs-dismiss="modal">取消</button>
-              <button type="submit" class="btn btn-slate-primary rounded-3 px-4">儲存變更</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ⚙️ 系統設定與密碼變更 Modal -->
-  <div class="modal fade" id="settingsModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content slate-card rounded-4 shadow-lg border-0">
-        <div class="modal-header border-bottom border-secondary-subtle p-4">
-          <h5 class="modal-title fw-bold d-flex align-items-center gap-2">
-            <i data-lucide="settings" class="text-primary"></i> 系統設定與管理
-          </h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body p-4">
-          <!-- 密碼修改區塊 -->
-          <div class="mb-4">
-            <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
-              <i data-lucide="key-round" class="text-primary" style="width:1rem;height:1rem;"></i> 修改管理員密碼
-            </h6>
-            <form id="changePasswordForm">
-              <div class="mb-2">
-                <label for="currentPassword" class="form-label small">目前密碼</label>
-                <input type="password" class="form-control rounded-3" id="currentPassword" placeholder="輸入目前密碼" required>
-              </div>
-              <div class="mb-2">
-                <label for="newPassword" class="form-label small">新密碼</label>
-                <input type="password" class="form-control rounded-3" id="newPassword" placeholder="輸入新密碼" required minlength="4">
-              </div>
-              <div class="mb-3">
-                <label for="confirmNewPassword" class="form-label small">確認新密碼</label>
-                <input type="password" class="form-control rounded-3" id="confirmNewPassword" placeholder="再次輸入新密碼" required minlength="4">
-              </div>
-              <button type="submit" class="btn btn-sm btn-outline-primary rounded-3 w-100 py-2">更新密碼</button>
-            </form>
-          </div>
-
-          <hr class="my-4 opacity-25">
-
-          <!-- 公告管理區塊 -->
-          <div>
-            <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
-              <i data-lucide="megaphone" class="text-primary" style="width:1rem;height:1rem;"></i> 發布系統公告
-            </h6>
-            <form id="addAnnouncementForm">
-              <div class="mb-2">
-                <label for="announceType" class="form-label small">公告類型</label>
-                <select id="announceType" class="form-select rounded-3">
-                  <option value="info">資訊 (藍色)</option>
-                  <option value="warning">警告 (黃色)</option>
-                  <option value="danger">緊急 (紅色)</option>
-                  <option value="success">成功 (綠色)</option>
-                </select>
-              </div>
-              <div class="mb-3">
-                <label for="announceContent" class="form-label small">公告內容</label>
-                <input type="text" id="announceContent" class="form-control rounded-3" placeholder="例如：系統維護公告..." required>
-              </div>
-              <button type="submit" class="btn btn-sm btn-outline-success rounded-3 w-100 py-2">發布公告</button>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <footer class="mt-auto pt-5 pb-3 text-center small">
     <div class="container">
       <div class="dropdown d-inline-block mb-3">
@@ -503,16 +367,12 @@
   <script>
     let API_URL = null;
     let globalHistoryData = [];
-    let globalAnnouncements = [];
     let currentTotalOwed = 0;
     let currentSortOrder = 'desc';
 
     let tableSortKey = 'date';
     let tableSortOrder = 'desc';
-
-    // 🔒 管理員狀態與密碼變更（預設前端測試密碼：1234，等等可接 GAS）
-    let isAdminLoggedIn = false;
-    let systemPassword = localStorage.getItem('ledger_admin_password') || '1234';
+    let adminPassword = null; // 暫存密碼
 
     // 取得使用者裝置本地時區日期
     function getLocalDateString() {
@@ -558,7 +418,6 @@
       }
 
       document.title = config.title;
-      document.getElementById('appHeaderTitle').innerText = config.title;
       API_URL = config.apiUrl;
     }
 
@@ -593,93 +452,6 @@
 
     const currentSavedTheme = localStorage.getItem('user-theme') || 'auto';
     applyTheme(currentSavedTheme);
-
-    // 🔐 管理員驗證/登出切換
-    async function toggleAdminAuth() {
-      const swalStyle = getSwalStyle();
-
-      if (isAdminLoggedIn) {
-        // 登出
-        isAdminLoggedIn = false;
-        updateAdminUI();
-        renderHistoryList();
-        Swal.fire({
-          icon: 'info',
-          title: '已切換為一般模式',
-          timer: 1500,
-          showConfirmButton: false,
-          background: swalStyle.background,
-          color: swalStyle.color
-        });
-      } else {
-        // 輸入密碼驗證
-        const { value: password } = await Swal.fire({
-          title: '請輸入管理員密碼',
-          input: 'password',
-          inputPlaceholder: '請輸入密碼',
-          inputAttributes: {
-            autocapitalize: 'off',
-            autocorrect: 'off'
-          },
-          showCancelButton: true,
-          confirmButtonText: '驗證登入',
-          cancelButtonText: '取消',
-          confirmButtonColor: '#2563eb',
-          background: swalStyle.background,
-          color: swalStyle.color
-        });
-
-        if (password) {
-          if (password === systemPassword) {
-            isAdminLoggedIn = true;
-            updateAdminUI();
-            renderHistoryList();
-            Swal.fire({
-              icon: 'success',
-              title: '驗證成功',
-              text: '已開啟編輯與管理權限',
-              timer: 1500,
-              showConfirmButton: false,
-              background: swalStyle.background,
-              color: swalStyle.color
-            });
-          } else {
-            Swal.fire({
-              icon: 'error',
-              title: '密碼錯誤',
-              text: '請確認後重試！',
-              background: swalStyle.background,
-              color: swalStyle.color
-            });
-          }
-        }
-      }
-    }
-
-    function updateAdminUI() {
-      const badge = document.getElementById('adminStatusBadge');
-      const authBtnText = document.getElementById('adminAuthBtnText');
-      const settingsBtn = document.getElementById('settingsBtn');
-
-      if (isAdminLoggedIn) {
-        badge.className = 'badge bg-primary-subtle text-primary admin-badge';
-        badge.innerText = '管理員模式';
-        authBtnText.innerText = '登出權限';
-        settingsBtn.classList.remove('d-none');
-      } else {
-        badge.className = 'badge bg-secondary-subtle text-secondary admin-badge';
-        badge.innerText = '一般檢視';
-        authBtnText.innerText = '管理員驗證';
-        settingsBtn.classList.add('d-none');
-      }
-      refreshIcons();
-    }
-
-    function openSettingsModal() {
-      if (!isAdminLoggedIn) return;
-      const settingsModal = new bootstrap.Modal(document.getElementById('settingsModal'));
-      settingsModal.show();
-    }
 
     function toggleSortOrder() {
       currentSortOrder = (currentSortOrder === 'desc') ? 'asc' : 'desc';
@@ -732,13 +504,13 @@
       }
 
       const groups = {};
-      globalHistoryData.forEach((item, originalIndex) => {
-        const itemWithIdx = { ...item, originalIndex };
+      globalHistoryData.forEach((item, index) => {
+        item._originalIndex = index; // 記錄原始索引方便操作
         const monthKey = item.date ? item.date.substring(0, 7) : '未知月份';
         if (!groups[monthKey]) {
           groups[monthKey] = [];
         }
-        groups[monthKey].push(itemWithIdx);
+        groups[monthKey].push(item);
       });
 
       const sortedMonthKeys = Object.keys(groups).sort((a, b) => {
@@ -788,19 +560,6 @@
         const tableRows = monthItems.map(item => {
           const isBorrow = item.type === '借錢';
           const amt = Number(item.amount) || 0;
-          
-          const actionColHeader = isAdminLoggedIn ? `<th class="text-center text-nowrap" style="width:90px;">操作</th>` : '';
-          const actionCell = isAdminLoggedIn ? `
-            <td class="text-center text-nowrap">
-              <button class="btn btn-sm btn-outline-primary p-1 py-0 me-1" title="編輯" onclick="openEditRecordModal(${item.originalIndex})">
-                <i data-lucide="pencil" style="width:0.85rem;height:0.85rem;"></i>
-              </button>
-              <button class="btn btn-sm btn-outline-danger p-1 py-0" title="刪除" onclick="deleteRecord(${item.originalIndex})">
-                <i data-lucide="trash-2" style="width:0.85rem;height:0.85rem;"></i>
-              </button>
-            </td>
-          ` : '';
-
           return `
             <tr>
               <td class="text-nowrap text-sub" style="font-size:0.85rem;">${item.date}</td>
@@ -813,7 +572,14 @@
                 ${isBorrow ? '+' : '-'} NT$ ${amt.toLocaleString()}
               </td>
               <td class="text-sub text-nowrap">${item.note || '-'}</td>
-              ${actionCell}
+              <td class="text-nowrap text-end">
+                <button class="btn btn-sm btn-link text-primary p-0 me-2" title="編輯" onclick="editRecord(${item._originalIndex})">
+                  <i data-lucide="pencil" style="width:1rem;height:1rem;"></i>
+                </button>
+                <button class="btn btn-sm btn-link text-danger p-0" title="刪除" onclick="deleteRecord(${item._originalIndex})">
+                  <i data-lucide="trash-2" style="width:1rem;height:1rem;"></i>
+                </button>
+              </td>
             </tr>
           `;
         }).join('');
@@ -858,8 +624,8 @@
                         <th class="sortable text-nowrap text-center ${tableSortKey === 'amount' ? 'active' : ''}" onclick="handleTableSort('amount')">
                           金額 ${getSortIconHtml('amount')}
                         </th>
-                        <th style="min-width: 150px;" class="text-sub text-nowrap">備註</th>
-                        ${isAdminLoggedIn ? '<th class="text-center text-nowrap">操作</th>' : ''}
+                        <th style="min-width: 120px;" class="text-sub text-nowrap">備註</th>
+                        <th class="text-end text-nowrap" style="width: 70px;">操作</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -888,6 +654,208 @@
         background: isDark ? '#121212' : '#ffffff',
         color: isDark ? '#f1f5f9' : '#0f172a'
       };
+    }
+
+    // 驗證管理員密碼
+    async function getPasswordAuthorization() {
+      if (adminPassword) return adminPassword;
+
+      const swalStyle = getSwalStyle();
+      const { value: password } = await Swal.fire({
+        title: '需要管理權限',
+        input: 'password',
+        inputLabel: '請輸入管理員密碼',
+        inputPlaceholder: '請輸入密碼',
+        showCancelButton: true,
+        cancelButtonText: '取消',
+        confirmButtonText: '驗證',
+        confirmButtonColor: '#2563eb',
+        background: swalStyle.background,
+        color: swalStyle.color
+      });
+
+      if (password) {
+        adminPassword = password;
+        return password;
+      }
+      return null;
+    }
+
+    // 編輯紀錄
+    async function editRecord(index) {
+      const record = globalHistoryData[index];
+      if (!record) return;
+
+      const pwd = await getPasswordAuthorization();
+      if (!pwd) return;
+
+      const swalStyle = getSwalStyle();
+
+      const { value: formValues } = await Swal.fire({
+        title: '編輯紀錄',
+        html: `
+          <div class="text-start mb-2">
+            <label class="form-label small">日期</label>
+            <input id="swal-input-date" class="swal2-input m-0 w-100" type="date" value="${record.date}">
+          </div>
+          <div class="text-start mb-2">
+            <label class="form-label small">類型</label>
+            <select id="swal-input-type" class="swal2-select m-0 w-100" style="display:flex;">
+              <option value="借錢" ${record.type === '借錢' ? 'selected' : ''}>借錢</option>
+              <option value="還錢" ${record.type === '還錢' ? 'selected' : ''}>還錢</option>
+            </select>
+          </div>
+          <div class="text-start mb-2">
+            <label class="form-label small">金額 (NT$)</label>
+            <input id="swal-input-amount" class="swal2-input m-0 w-100" type="number" min="1" value="${record.amount}">
+          </div>
+          <div class="text-start mb-2">
+            <label class="form-label small">備註</label>
+            <input id="swal-input-note" class="swal2-input m-0 w-100" type="text" value="${record.note || ''}">
+          </div>
+        `,
+        focusConfirm: false,
+        showCancelButton: true,
+        confirmButtonText: '儲存修改',
+        cancelButtonText: '取消',
+        confirmButtonColor: '#2563eb',
+        background: swalStyle.background,
+        color: swalStyle.color,
+        preConfirm: () => {
+          return {
+            date: document.getElementById('swal-input-date').value,
+            type: document.getElementById('swal-input-type').value,
+            amount: Number(document.getElementById('swal-input-amount').value),
+            note: document.getElementById('swal-input-note').value
+          };
+        }
+      });
+
+      if (!formValues) return;
+
+      Swal.fire({
+        title: '更新中...',
+        background: swalStyle.background,
+        color: swalStyle.color,
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
+
+      try {
+        const payload = {
+          action: 'edit',
+          password: pwd,
+          index: index,
+          record: formValues
+        };
+
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        const result = await res.json();
+
+        if (result.status === 'error' && result.message === '密碼錯誤') {
+          adminPassword = null;
+          throw new Error('密碼錯誤！');
+        }
+
+        if (result.status !== 'success') {
+          throw new Error('修改失敗');
+        }
+
+        await loadData(false);
+        Swal.fire({
+          icon: 'success',
+          title: '修改成功',
+          timer: 1500,
+          showConfirmButton: false,
+          background: swalStyle.background,
+          color: swalStyle.color
+        });
+      } catch (err) {
+        Swal.fire({
+          icon: 'error',
+          title: '操作失敗',
+          text: err.message,
+          background: swalStyle.background,
+          color: swalStyle.color
+        });
+      }
+    }
+
+    // 刪除紀錄
+    async function deleteRecord(index) {
+      const record = globalHistoryData[index];
+      if (!record) return;
+
+      const pwd = await getPasswordAuthorization();
+      if (!pwd) return;
+
+      const swalStyle = getSwalStyle();
+
+      const confirmRes = await Swal.fire({
+        title: '確定要刪除這筆紀錄？',
+        text: `${record.date} | ${record.type} | NT$ ${record.amount} (${record.note || '無備註'})`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        confirmButtonText: '確定刪除',
+        cancelButtonText: '取消',
+        background: swalStyle.background,
+        color: swalStyle.color
+      });
+
+      if (!confirmRes.isConfirmed) return;
+
+      Swal.fire({
+        title: '刪除中...',
+        background: swalStyle.background,
+        color: swalStyle.color,
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
+
+      try {
+        const payload = {
+          action: 'delete',
+          password: pwd,
+          index: index
+        };
+
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        const result = await res.json();
+
+        if (result.status === 'error' && result.message === '密碼錯誤') {
+          adminPassword = null;
+          throw new Error('密碼錯誤！');
+        }
+
+        if (result.status !== 'success') {
+          throw new Error('刪除失敗');
+        }
+
+        await loadData(false);
+        Swal.fire({
+          icon: 'success',
+          title: '已刪除紀錄',
+          timer: 1500,
+          showConfirmButton: false,
+          background: swalStyle.background,
+          color: swalStyle.color
+        });
+      } catch (err) {
+        Swal.fire({
+          icon: 'error',
+          title: '操作失敗',
+          text: err.message,
+          background: swalStyle.background,
+          color: swalStyle.color
+        });
+      }
     }
 
     const alertIconMap = {
@@ -919,8 +887,22 @@
         const res = await fetch(API_URL);
         const data = await res.json();
 
-        globalAnnouncements = data.announcements || [];
-        renderAnnouncements();
+        const container = document.getElementById('announcementContainer');
+        if (data.announcements && data.announcements.length > 0) {
+          container.innerHTML = data.announcements.map((item) => {
+            const alertType = item.type || 'info';
+            const iconName = alertIconMap[alertType] || 'megaphone';
+
+            return `
+              <div class="alert alert-${alertType} alert-dismissible fade show m-0 rounded-3 d-flex align-items-center gap-2 border-0 shadow-sm" role="alert">
+                <i data-lucide="${iconName}" class="flex-shrink-0"></i>
+                <div class="flex-grow-1 fw-medium">${item.content}</div>
+              </div>
+            `;
+          }).join('');
+        } else {
+          container.innerHTML = '';
+        }
 
         currentTotalOwed = data.totalOwed || 0;
         globalHistoryData = data.history || [];
@@ -955,27 +937,6 @@
       }
     }
 
-    function renderAnnouncements() {
-      const container = document.getElementById('announcementContainer');
-      if (globalAnnouncements && globalAnnouncements.length > 0) {
-        container.innerHTML = globalAnnouncements.map((item) => {
-          const alertType = item.type || 'info';
-          const iconName = alertIconMap[alertType] || 'megaphone';
-
-          return `
-            <div class="alert alert-${alertType} alert-dismissible fade show m-0 rounded-3 d-flex align-items-center gap-2 border-0 shadow-sm" role="alert">
-              <i data-lucide="${iconName}" class="flex-shrink-0"></i>
-              <div class="flex-grow-1 fw-medium">${item.content}</div>
-            </div>
-          `;
-        }).join('');
-        refreshIcons();
-      } else {
-        container.innerHTML = '';
-      }
-    }
-
-    // 送出新增紀錄
     document.getElementById('ledgerForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -1013,20 +974,7 @@
           throw new Error('寫入失敗');
         }
 
-        if (typeVal === '借錢') {
-          currentTotalOwed += amountVal;
-        } else if (typeVal === '還錢') {
-          currentTotalOwed -= amountVal;
-        }
-        globalHistoryData.unshift({
-          date: dateVal,
-          type: typeVal,
-          amount: amountVal,
-          note: noteVal
-        });
-
-        updateUIStats();
-        renderHistoryList();
+        await loadData(false);
 
         document.getElementById('amount').value = '';
         document.getElementById('note').value = '';
@@ -1054,276 +1002,6 @@
         submitBtn.disabled = false;
         submitBtn.innerHTML = `<i data-lucide="send"></i> 送出紀錄`;
         refreshIcons();
-      }
-    });
-
-    // ✏️ 開啟編輯紀錄 Modal
-    function openEditRecordModal(index) {
-      if (!isAdminLoggedIn) return;
-      const record = globalHistoryData[index];
-      if (!record) return;
-
-      document.getElementById('editIndex').value = index;
-      document.getElementById('editDate').value = record.date;
-      document.getElementById('editType').value = record.type;
-      document.getElementById('editAmount').value = record.amount;
-      document.getElementById('editNote').value = record.note || '';
-
-      const modal = new bootstrap.Modal(document.getElementById('editRecordModal'));
-      modal.show();
-    }
-
-    // 💾 儲存編輯紀錄
-    document.getElementById('editRecordForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const index = document.getElementById('editIndex').value;
-      const date = document.getElementById('editDate').value;
-      const type = document.getElementById('editType').value;
-      const amount = Number(document.getElementById('editAmount').value);
-      const note = document.getElementById('editNote').value;
-
-      const updatedRecordPayload = {
-        action: 'edit',
-        index: Number(index),
-        date: date,
-        type: type,
-        amount: amount,
-        note: note
-      };
-
-      const swalStyle = getSwalStyle();
-
-      try {
-        Swal.fire({
-          title: '更新中...',
-          background: swalStyle.background,
-          color: swalStyle.color,
-          didOpen: () => Swal.showLoading()
-        });
-
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          body: JSON.stringify(updatedRecordPayload)
-        });
-        const result = await res.json();
-
-        if (result.status === 'success') {
-          globalHistoryData[index] = { date, type, amount, note };
-          recalculateTotalOwed();
-          updateUIStats();
-          renderHistoryList();
-
-          const editModalEl = document.getElementById('editRecordModal');
-          const modalInstance = bootstrap.Modal.getInstance(editModalEl);
-          if (modalInstance) modalInstance.hide();
-
-          Swal.fire({
-            icon: 'success',
-            title: '修改成功',
-            timer: 1500,
-            showConfirmButton: false,
-            background: swalStyle.background,
-            color: swalStyle.color
-          });
-        } else {
-          throw new Error('伺服器更新失敗');
-        }
-      } catch (err) {
-        Swal.fire({
-          icon: 'error',
-          title: '修改失敗',
-          text: err.message,
-          background: swalStyle.background,
-          color: swalStyle.color
-        });
-      }
-    });
-
-    // 🗑️ 刪除紀錄
-    async function deleteRecord(index) {
-      if (!isAdminLoggedIn) return;
-      const record = globalHistoryData[index];
-      if (!record) return;
-
-      const swalStyle = getSwalStyle();
-
-      const confirm = await Swal.fire({
-        title: '確定要刪除這筆紀錄？',
-        text: `${record.date} | ${record.type} | NT$ ${record.amount}`,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: '確定刪除',
-        cancelButtonText: '取消',
-        background: swalStyle.background,
-        color: swalStyle.color
-      });
-
-      if (confirm.isConfirmed) {
-        try {
-          Swal.fire({
-            title: '刪除中...',
-            background: swalStyle.background,
-            color: swalStyle.color,
-            didOpen: () => Swal.showLoading()
-          });
-
-          const deletePayload = {
-            action: 'delete',
-            index: index
-          };
-
-          const res = await fetch(API_URL, {
-            method: 'POST',
-            body: JSON.stringify(deletePayload)
-          });
-          const result = await res.json();
-
-          if (result.status === 'success') {
-            globalHistoryData.splice(index, 1);
-            recalculateTotalOwed();
-            updateUIStats();
-            renderHistoryList();
-
-            Swal.fire({
-              icon: 'success',
-              title: '已刪除紀錄',
-              timer: 1500,
-              showConfirmButton: false,
-              background: swalStyle.background,
-              color: swalStyle.color
-            });
-          } else {
-            throw new Error('伺服器刪除失敗');
-          }
-        } catch (err) {
-          Swal.fire({
-            icon: 'error',
-            title: '刪除失敗',
-            text: err.message,
-            background: swalStyle.background,
-            color: swalStyle.color
-          });
-        }
-      }
-    }
-
-    function recalculateTotalOwed() {
-      let total = 0;
-      globalHistoryData.forEach(item => {
-        const amt = Number(item.amount) || 0;
-        if (item.type === '借錢') total += amt;
-        if (item.type === '還錢') total -= amt;
-      });
-      currentTotalOwed = total;
-    }
-
-    // 🔑 修改密碼表單處理
-    document.getElementById('changePasswordForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const currentPwd = document.getElementById('currentPassword').value;
-      const newPwd = document.getElementById('newPassword').value;
-      const confirmPwd = document.getElementById('confirmNewPassword').value;
-      const swalStyle = getSwalStyle();
-
-      if (currentPwd !== systemPassword) {
-        Swal.fire({
-          icon: 'error',
-          title: '舊密碼錯誤',
-          text: '請確認目前的密碼！',
-          background: swalStyle.background,
-          color: swalStyle.color
-        });
-        return;
-      }
-
-      if (newPwd !== confirmPwd) {
-        Swal.fire({
-          icon: 'error',
-          title: '新密碼不一致',
-          text: '兩次輸入的新密碼必須完全相同！',
-          background: swalStyle.background,
-          color: swalStyle.color
-        });
-        return;
-      }
-
-      try {
-        systemPassword = newPwd;
-        localStorage.setItem('ledger_admin_password', newPwd);
-
-        // 發送給 GAS 後端備份更新 (若有實作 updatePassword)
-        fetch(API_URL, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'updatePassword', password: newPwd })
-        }).catch(err => console.log('GAS sync offline'));
-
-        Swal.fire({
-          icon: 'success',
-          title: '密碼已更新',
-          text: '新密碼設定成功！',
-          timer: 1500,
-          showConfirmButton: false,
-          background: swalStyle.background,
-          color: swalStyle.color
-        });
-
-        document.getElementById('changePasswordForm').reset();
-      } catch (err) {
-        Swal.fire({
-          icon: 'error',
-          title: '密碼更新失敗',
-          text: err.message,
-          background: swalStyle.background,
-          color: swalStyle.color
-        });
-      }
-    });
-
-    // 📢 新增公告表單處理
-    document.getElementById('addAnnouncementForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const type = document.getElementById('announceType').value;
-      const content = document.getElementById('announceContent').value;
-      const swalStyle = getSwalStyle();
-
-      try {
-        const payload = {
-          action: 'addAnnouncement',
-          type: type,
-          content: content
-        };
-
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          body: JSON.stringify(payload)
-        });
-
-        globalAnnouncements.push({ type, content });
-        renderAnnouncements();
-
-        document.getElementById('addAnnouncementForm').reset();
-
-        Swal.fire({
-          icon: 'success',
-          title: '公告已發布',
-          timer: 1500,
-          showConfirmButton: false,
-          background: swalStyle.background,
-          color: swalStyle.color
-        });
-      } catch (err) {
-        Swal.fire({
-          icon: 'error',
-          title: '發布失敗',
-          text: err.message,
-          background: swalStyle.background,
-          color: swalStyle.color
-        });
       }
     });
 
