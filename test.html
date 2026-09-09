@@ -33,7 +33,6 @@
       --accordion-btn-active-bg: #2a2a2a;
       --table-hover-bg: #262626;
       --th-hover-bg: 0;
-      --edit-cell-bg: #2d3748;
     }
     
     /* ☀️ 淺色模式 (Light Mode) */
@@ -51,7 +50,6 @@
       --accordion-btn-active-bg: #f1f5f9;
       --table-hover-bg: #f8fafc;
       --th-hover-bg: 0;
-      --edit-cell-bg: #f1f5f9;
     }
 
     html, body {
@@ -185,27 +183,22 @@
     
     .table-custom td {
       border-bottom: 1px solid var(--card-border);
-      padding: 0.85rem 1rem;
+      padding: 0.6rem 0.75rem;
       vertical-align: middle;
       font-size: 0.95rem;
     }
 
-    /* ✏️ 編輯模式專屬樣式 */
-    body.is-edit-mode .editable-cell {
-      cursor: pointer;
-      outline: 1px dashed #3b82f6;
-      outline-offset: -2px;
-      border-radius: 4px;
-      transition: background-color 0.2s;
-    }
-    
-    body.is-edit-mode .editable-cell:hover {
-      background-color: var(--edit-cell-bg) !important;
+    /* ✏️ 編輯模式輸入框緊湊微調 */
+    .edit-input-sm {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.875rem;
+      border-radius: 6px;
     }
 
-    body.is-edit-mode .editable-cell:focus {
-      outline: 2px solid #2563eb;
-      background-color: var(--edit-cell-bg) !important;
+    tr.pending-deleted {
+      opacity: 0.4;
+      text-decoration: line-through;
+      background-color: rgba(220, 38, 38, 0.1) !important;
     }
 
     .table-custom tr:last-child td {
@@ -397,7 +390,9 @@
     let tableSortOrder = 'desc';
     let adminPassword = null;
     let isEditMode = false;
-    let pendingChanges = new Map(); // 記錄修改過的索引與資料：Map<index, updatedRecord>
+    
+    // 儲存修改與刪除的隊列 Map<index, { action: 'edit'|'delete', record?: {...} }>
+    let pendingChanges = new Map();
 
     function getLocalDateString() {
       const now = new Date();
@@ -514,14 +509,14 @@
       document.getElementById('recordCount').innerText = `${globalHistoryData.length} 筆紀錄`;
     }
 
-    // ✏️ 切換編輯模式與退出時回存
+    // ✏️ 切換編輯模式與退出時批次回存
     async function toggleEditMode() {
       if (!isEditMode) {
         const pwd = await getPasswordAuthorization();
         if (!pwd) return;
 
         isEditMode = true;
-        pendingChanges.clear(); // 清空暫存
+        pendingChanges.clear(); // 清空前端暫存
         document.body.classList.add('is-edit-mode');
         const btn = document.getElementById('editModeBtn');
         btn.classList.remove('btn-outline-warning');
@@ -529,7 +524,7 @@
         document.getElementById('editModeLabel').innerText = '退出編輯';
         renderHistoryList();
       } else {
-        // 退出編輯模式：如有修改資料則跳出 Swal 批次同步
+        // 退出編輯模式：如果有修改或刪除，一次性批次同步
         if (pendingChanges.size > 0) {
           await batchSyncChanges();
         } else {
@@ -544,14 +539,14 @@
       }
     }
 
-    // 🔄 批次回存修改至 GAS
+    // 🔄 批次回存所有異動（編輯+刪除）至 GAS
     async function batchSyncChanges() {
       const swalStyle = getSwalStyle();
       const totalTasks = pendingChanges.size;
 
       Swal.fire({
         title: '同步修訂資料中...',
-        html: `正在寫入 <b>${totalTasks}</b> 筆異動，請稍候...`,
+        html: `正在寫入 <b>${totalTasks}</b> 筆異動（編輯與刪除），請稍候...`,
         background: swalStyle.background,
         color: swalStyle.color,
         allowOutsideClick: false,
@@ -559,19 +554,26 @@
       });
 
       try {
-        // 依序處理排隊的異動（避免併發造成 GAS 鎖定）
-        for (const [index, record] of pendingChanges.entries()) {
-          const payload = {
-            action: 'edit',
+        // GAS 刪除時傳遞原始陣列索引，避免索引錯位，從後向前排隊處理刪除
+        const sortedEntries = Array.from(pendingChanges.entries()).sort((a, b) => b[0] - a[0]);
+
+        for (const [index, change] of sortedEntries) {
+          let payload = {
             password: adminPassword,
-            index: index,
-            record: {
-              date: record.date,
-              type: record.type,
-              amount: Number(record.amount),
-              note: record.note
-            }
+            index: index
           };
+
+          if (change.action === 'delete') {
+            payload.action = 'delete';
+          } else {
+            payload.action = 'edit';
+            payload.record = {
+              date: change.record.date,
+              type: change.record.type,
+              amount: Number(change.record.amount),
+              note: change.record.note
+            };
+          }
 
           const res = await fetch(API_URL, {
             method: 'POST',
@@ -585,7 +587,7 @@
           }
 
           if (result.status !== 'success') {
-            throw new Error(`索引 #${index} 儲存失敗`);
+            throw new Error(`索引 #${index} 操作失敗`);
           }
         }
 
@@ -687,36 +689,64 @@
         const formattedMonthLabel = year && month ? `${year} 年 ${month} 月` : monthKey;
 
         const tableRows = monthItems.map(item => {
+          const origIdx = item._originalIndex;
           const isBorrow = item.type === '借錢';
           const amt = Number(item.amount) || 0;
-          const editableAttr = isEditMode ? 'contenteditable="true"' : '';
+          const isPendingDeleted = pendingChanges.get(origIdx)?.action === 'delete';
 
-          return `
-            <tr data-index="${item._originalIndex}">
-              <td class="text-nowrap text-sub editable-cell" ${editableAttr} data-field="date" onblur="handleCellBlur(this, ${item._originalIndex}, 'date')" style="font-size:0.85rem;">${item.date}</td>
-              <td class="text-nowrap">
-                ${isEditMode ? `
-                  <select class="form-select form-select-sm" onchange="handleTypeSelectChange(this, ${item._originalIndex})">
+          if (isEditMode) {
+            return `
+              <tr class="${isPendingDeleted ? 'pending-deleted' : ''}">
+                <td style="width: 145px;">
+                  <input type="date" class="form-control form-control-sm edit-input-sm" 
+                         value="${item.date}" 
+                         onchange="handleInputChange(${origIdx}, 'date', this.value)" 
+                         ${isPendingDeleted ? 'disabled' : ''}>
+                </td>
+                <td style="width: 110px;">
+                  <select class="form-select form-select-sm edit-input-sm" 
+                          onchange="handleInputChange(${origIdx}, 'type', this.value)"
+                          ${isPendingDeleted ? 'disabled' : ''}>
                     <option value="借錢" ${item.type === '借錢' ? 'selected' : ''}>借錢</option>
                     <option value="還錢" ${item.type === '還錢' ? 'selected' : ''}>還錢</option>
                   </select>
-                ` : `
-                  <span class="badge ${isBorrow ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success'} rounded-2 fw-normal">
-                    ${item.type}
-                  </span>
-                `}
-              </td>
-              <td class="fw-bold ${isBorrow ? 'text-danger' : 'text-success'} text-nowrap editable-cell" ${editableAttr} data-field="amount" onblur="handleCellBlur(this, ${item._originalIndex}, 'amount')">
-                ${amt}
-              </td>
-              <td class="text-sub text-nowrap editable-cell" ${editableAttr} data-field="note" onblur="handleCellBlur(this, ${item._originalIndex}, 'note')">${item.note || ''}</td>
-              ${isEditMode ? `
-                <td class="text-nowrap text-end">
-                  <button class="btn btn-sm btn-link text-danger p-0" title="刪除" onclick="deleteRecord(${item._originalIndex})">
-                    <i data-lucide="trash-2" style="width:1rem;height:1rem;"></i>
+                </td>
+                <td style="width: 110px;">
+                  <input type="number" class="form-control form-control-sm edit-input-sm fw-bold ${isBorrow ? 'text-danger' : 'text-success'}" 
+                         value="${amt}" min="1" 
+                         onchange="handleInputChange(${origIdx}, 'amount', this.value)" 
+                         ${isPendingDeleted ? 'disabled' : ''}>
+                </td>
+                <td>
+                  <input type="text" class="form-control form-control-sm edit-input-sm" 
+                         value="${item.note || ''}" placeholder="備註" 
+                         onchange="handleInputChange(${origIdx}, 'note', this.value)" 
+                         ${isPendingDeleted ? 'disabled' : ''}>
+                </td>
+                <td class="text-end" style="width: 40px;">
+                  <button class="btn btn-sm btn-link ${isPendingDeleted ? 'text-secondary' : 'text-danger'} p-0" 
+                          title="${isPendingDeleted ? '復原刪除' : '標記刪除'}" 
+                          onclick="togglePendingDelete(${origIdx})">
+                    <i data-lucide="${isPendingDeleted ? 'rotate-ccw' : 'trash-2'}" style="width:1rem;height:1rem;"></i>
                   </button>
                 </td>
-              ` : '<td></td>'}
+              </tr>
+            `;
+          }
+
+          return `
+            <tr>
+              <td class="text-nowrap text-sub" style="font-size:0.85rem;">${item.date}</td>
+              <td class="text-nowrap">
+                <span class="badge ${isBorrow ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success'} rounded-2 fw-normal">
+                  ${item.type}
+                </span>
+              </td>
+              <td class="fw-bold ${isBorrow ? 'text-danger' : 'text-success'} text-nowrap">
+                ${amt}
+              </td>
+              <td class="text-sub text-nowrap">${item.note || ''}</td>
+              <td></td>
             </tr>
           `;
         }).join('');
@@ -779,38 +809,37 @@
       refreshIcons();
     }
 
-    // ✏️ 欄位離開焦點 (Blur) 時僅更新本地暫存
-    function handleCellBlur(cell, index, field) {
+    // ✏️ 表單控制項數值變更時寫入暫存
+    function handleInputChange(index, field, value) {
       if (!isEditMode) return;
 
       const record = globalHistoryData[index];
       if (!record) return;
 
-      let newValue = cell.innerText.trim();
-      if (field === 'amount') newValue = Number(newValue) || 0;
+      let val = value;
+      if (field === 'amount') val = Number(value) || 0;
 
-      if (record[field] == newValue) return;
+      record[field] = val; // 更新記憶體資料
 
-      const currentPending = pendingChanges.get(index) || { ...record };
-      currentPending[field] = newValue;
-
-      pendingChanges.set(index, currentPending);
-      globalHistoryData[index][field] = newValue; // 更新前端顯示記憶體
+      const currentPending = pendingChanges.get(index) || { action: 'edit', record: { ...record } };
+      if (currentPending.action === 'edit') {
+        currentPending.record[field] = val;
+        pendingChanges.set(index, currentPending);
+      }
     }
 
-    // ✏️ 下拉選單切換類型僅更新本地暫存
-    function handleTypeSelectChange(selectEl, index) {
-      const record = globalHistoryData[index];
-      if (!record) return;
+    // 🗑️ 標記刪除／取消刪除（僅暫存於前端）
+    function togglePendingDelete(index) {
+      const currentPending = pendingChanges.get(index);
 
-      const newValue = selectEl.value;
-      if (record.type === newValue) return;
-
-      const currentPending = pendingChanges.get(index) || { ...record };
-      currentPending.type = newValue;
-
-      pendingChanges.set(index, currentPending);
-      globalHistoryData[index].type = newValue;
+      if (currentPending && currentPending.action === 'delete') {
+        // 取消刪除
+        pendingChanges.delete(index);
+      } else {
+        // 標記刪除
+        pendingChanges.set(index, { action: 'delete' });
+      }
+      renderHistoryList();
     }
 
     function selectType(value, labelHtml) {
@@ -849,81 +878,6 @@
         return password;
       }
       return null;
-    }
-
-    async function deleteRecord(index) {
-      const record = globalHistoryData[index];
-      if (!record) return;
-
-      const pwd = await getPasswordAuthorization();
-      if (!pwd) return;
-
-      const swalStyle = getSwalStyle();
-
-      const confirmRes = await Swal.fire({
-        title: '確定要刪除這筆紀錄？',
-        text: `${record.date} | ${record.type} | NT$ ${record.amount} (${record.note || '無備註'})`,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#dc2626',
-        confirmButtonText: '確定刪除',
-        cancelButtonText: '取消',
-        background: swalStyle.background,
-        color: swalStyle.color
-      });
-
-      if (!confirmRes.isConfirmed) return;
-
-      Swal.fire({
-        title: '刪除中...',
-        background: swalStyle.background,
-        color: swalStyle.color,
-        allowOutsideClick: false,
-        didOpen: () => Swal.showLoading()
-      });
-
-      try {
-        const payload = {
-          action: 'delete',
-          password: pwd,
-          index: index
-        };
-
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          body: JSON.stringify(payload)
-        });
-        const result = await res.json();
-
-        if (result.status === 'error' && result.message === '密碼錯誤') {
-          adminPassword = null;
-          throw new Error('密碼錯誤！');
-        }
-
-        if (result.status !== 'success') {
-          throw new Error('刪除失敗');
-        }
-
-        pendingChanges.delete(index); // 若暫存有此筆則刪除
-        await loadData(false);
-
-        Swal.fire({
-          icon: 'success',
-          title: '已刪除紀錄',
-          timer: 1500,
-          showConfirmButton: false,
-          background: swalStyle.background,
-          color: swalStyle.color
-        });
-      } catch (err) {
-        Swal.fire({
-          icon: 'error',
-          title: '操作失敗',
-          text: err.message,
-          background: swalStyle.background,
-          color: swalStyle.color
-        });
-      }
     }
 
     const alertIconMap = {
@@ -1047,6 +1001,7 @@
         document.getElementById('amount').value = '';
         document.getElementById('note').value = '';
 
+        alertEl.classList.remove('show');
         alertEl.classList.remove('d-none');
         setTimeout(() => alertEl.classList.add('show'), 10);
         refreshIcons();
