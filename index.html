@@ -11,10 +11,10 @@
   <!-- Bootstrap 5.3 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   
-  <!-- Lucide Icons 套件 -->
+  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
-  <!-- SweetAlert2 彈出視窗套件 -->
+  <!-- SweetAlert2 -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <style>
@@ -40,6 +40,11 @@
       --badge-repay-text: #4ade80;
       --amount-lend-text: #f87171;
       --amount-repay-text: #34d399;
+      
+      --row-modified-bg: rgba(234, 179, 8, 0.08);
+      --row-deleted-bg: rgba(239, 68, 68, 0.12);
+      --edit-field-bg: #2a2d35;
+      --edit-field-border: #3f4452;
     }
     
     /* ☀️ 淺色模式 (Light Mode) */
@@ -64,6 +69,24 @@
       --badge-repay-text: #16a34a;
       --amount-lend-text: #dc2626;
       --amount-repay-text: #16a34a;
+
+      --row-modified-bg: #fefce8;
+      --row-deleted-bg: #fef2f2;
+      --edit-field-bg: #ffffff;
+      --edit-field-border: #cbd5e1;
+    }
+
+    .drag-handle {
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
+    }
+    .drag-handle:active {
+      cursor: grabbing;
+    }
+    .announcement-swal-item.dragging {
+      opacity: 0.4;
+      border: 2px dashed #3b82f6 !important;
     }
 
     html, body {
@@ -89,6 +112,7 @@
       background-color: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
     }
     
     .hero-card {
@@ -136,7 +160,7 @@
     .dropdown-menu {
       background-color: var(--card-bg) !important;
       border: 1px solid var(--card-border) !important;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2) !important;
     }
     
     .dropdown-item { color: var(--text-primary) !important; }
@@ -166,7 +190,6 @@
       padding: 0;
     }
     
-    /* 📊 表格樣式調整 */
     .table-custom {
       margin-bottom: 0;
       color: var(--text-primary) !important;
@@ -176,9 +199,11 @@
       background-color: transparent;
       color: #64748b;
       font-weight: 600;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
       border-bottom: 1px solid var(--card-border);
-      padding: 0.8rem 1rem;
+      padding: 0.8rem 0.75rem;
       user-select: none;
     }
     
@@ -197,45 +222,87 @@
     
     .table-custom td {
       border-bottom: 1px solid var(--card-border);
-      padding: 0.9rem 1rem;
+      padding: 0.75rem 0.75rem;
       vertical-align: middle;
-      font-size: 0.95rem;
+      font-size: 0.92rem;
+      transition: background-color 0.15s;
     }
 
-    /* ✏️ 歷史紀錄編輯元件：無外框透視風格 */
-    .edit-input-clean {
-      background-color: transparent !important;
-      border: 1px solid transparent !important;
-      box-shadow: none !important;
-      padding: 0.25rem 0.5rem;
-      font-size: 0.95rem;
-      border-radius: 6px;
-      transition: border-color 0.15s ease-in-out, background-color 0.15s ease-in-out;
-      text-align: left !important;
+    .edit-row-modified {
+      background-color: var(--row-modified-bg) !important;
     }
 
-    .edit-input-clean:hover,
-    .edit-input-clean:focus {
-      background-color: var(--input-bg) !important;
-      border-color: var(--card-border) !important;
+    .edit-row-deleted {
+      background-color: var(--row-deleted-bg) !important;
     }
 
-    .edit-input-clean:focus {
+    .edit-row-deleted td {
+      opacity: 0.6;
+    }
+
+    .edit-row-deleted .edit-input-stylish {
+      text-decoration: line-through;
+    }
+
+    .edit-input-stylish {
+      background-color: var(--edit-field-bg) !important;
+      border: 1px solid var(--edit-field-border) !important;
+      color: var(--text-primary) !important;
+      border-radius: 8px;
+      padding: 0.38rem 0.65rem;
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+
+    /* 借錢與還錢選單顏色標籤 */
+    select.edit-type-lend {
+      color: var(--amount-lend-text) !important;
+      font-weight: 700;
+    }
+
+    select.edit-type-repay {
+      color: var(--amount-repay-text) !important;
+      font-weight: 700;
+    }
+
+    .edit-input-stylish:hover {
       border-color: #3b82f6 !important;
-      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
     }
 
-    /* 寬度拉長的備註格子 */
+    .edit-input-stylish:focus {
+      border-color: #2563eb !important;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2) !important;
+      outline: none;
+    }
+
     .edit-note-input {
       width: 100%;
-      min-width: 180px;
-      text-align: left; /* 改為靠左 */
+      min-width: 150px;
     }
 
-    tr.pending-deleted {
-      opacity: 0.4;
-      text-decoration: line-through;
-      background-color: rgba(220, 38, 38, 0.1) !important;
+    .action-btn-group {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+    }
+
+    .btn-action-icon {
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      transition: all 0.15s ease-in-out;
+    }
+
+    .btn-action-icon:hover:not(:disabled) {
+      transform: translateY(-1px);
     }
 
     .table-custom tr:last-child td {
@@ -246,23 +313,24 @@
       background-color: var(--table-hover-bg);
     }
 
-    /* 🏷️ 類型 Tag 專用字體顏色 */
     .badge-lend {
       background-color: var(--badge-lend-bg);
       color: var(--badge-lend-text) !important;
       font-weight: 700;
-      padding: 0.35em 0.8em;
-      border-radius: 6px;
+      padding: 0.35em 0.75em;
+      border-radius: 8px;
       display: inline-block;
+      font-size: 0.82rem;
     }
 
     .badge-repay {
       background-color: var(--badge-repay-bg);
       color: var(--badge-repay-text) !important;
       font-weight: 700;
-      padding: 0.35em 0.8em;
-      border-radius: 6px;
+      padding: 0.35em 0.75em;
+      border-radius: 8px;
       display: inline-block;
+      font-size: 0.82rem;
     }
 
     .amount-lend {
@@ -279,6 +347,20 @@
       padding: 0 !important;
     }
 
+    .swal2-popup-custom {
+      background-color: var(--card-bg) !important;
+      color: var(--text-primary) !important;
+      border-radius: 18px !important;
+      border: 1px solid var(--card-border) !important;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3) !important;
+    }
+
+    /* 放大公告管理彈窗 */
+    .swal-wide-popup {
+      width: 92% !important;
+      max-width: 760px !important;
+    }
+
     .swal2-container .swal-fullscreen-popup {
       width: 100vw !important;
       height: 100vh !important;
@@ -291,6 +373,25 @@
       flex-direction: column !important;
       justify-content: center !important;
       align-items: center !important;
+    }
+
+    .announcement-swal-item {
+      background-color: var(--input-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 0.75rem 0.85rem;
+      margin-bottom: 0.75rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .announcement-swal-item.is-hidden {
+      opacity: 0.55;
+      background-color: rgba(100, 116, 139, 0.1);
+    }
+
+    .announcement-swal-item:focus-within {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
     }
 
     i[data-lucide] {
@@ -320,20 +421,27 @@
 
   <div class="container flex-grow-1" style="max-width: 1000px;">
     
-    <!-- 頂部列：公告與右上角操作區 (含同步儲存與登入/登出) -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <!-- 頂部列：系統標題與右上角操作區 -->
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
       <div class="fw-bold fs-5 text-primary d-flex align-items-center gap-2">
         <i data-lucide="calculator"></i> <span id="appTitle">帳務管理系統</span>
       </div>
       
-      <div class="d-flex align-items-center gap-2">
-        <!-- 同步儲存按鈕 (已移至此處) -->
-        <button class="btn btn-sm btn-success rounded-pill px-3 py-1.5 d-none align-items-center gap-1.5" onclick="batchSyncChanges()" id="saveChangesBtn">
-          <i data-lucide="save" style="width: 1rem; height: 1rem;"></i> <span>儲存變更</span>
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <!-- 管理員公告設定按鈕 (登入後顯示) -->
+        <button class="btn btn-sm btn-outline-warning rounded-pill px-3 py-1.5 d-none align-items-center gap-1.5 fw-medium" onclick="openAnnouncementSwal()" id="announcementMgmtBtn">
+          <i data-lucide="megaphone" style="width: 1rem; height: 1rem;"></i> <span>公告管理</span>
+        </button>
+
+        <!-- 同步儲存按鈕 (登入後顯示) -->
+        <button class="btn btn-sm btn-success rounded-pill px-3 py-1.5 d-none align-items-center gap-1.5 shadow-sm fw-medium" onclick="batchSyncChanges()" id="saveChangesBtn">
+          <i data-lucide="save" style="width: 1rem; height: 1rem;"></i>
+          <span>儲存變更</span>
+          <span class="badge bg-white text-success rounded-circle ms-1 d-none" id="pendingChangesBadge">0</span>
         </button>
 
         <!-- 右上角管理員登入/登出按鈕 -->
-        <button class="btn btn-sm rounded-pill px-3 py-1.5 d-flex align-items-center gap-1.5" id="authBtn" onclick="handleAuthAction()">
+        <button class="btn btn-sm rounded-pill px-3 py-1.5 d-flex align-items-center gap-1.5 fw-medium" id="authBtn" onclick="handleAuthAction()">
           <i data-lucide="lock" style="width:1rem; height:1rem;"></i>
           <span>管理員登入</span>
         </button>
@@ -342,21 +450,6 @@
 
     <!-- 公告展示區 -->
     <div id="announcementContainer" class="d-flex flex-column gap-2 mb-3"></div>
-    
-    <!-- 📢 管理員公告編輯區 (登入後顯示) -->
-    <div id="announcementEditorCard" class="card slate-card mb-4 d-none">
-      <div class="card-header bg-transparent border-0 pt-3 px-4 pb-0 d-flex align-items-center justify-content-between">
-        <h6 class="card-title fw-bold m-0 d-flex align-items-center gap-2 text-warning">
-          <i data-lucide="megaphone"></i> 管理員公告設定
-        </h6>
-        <button class="btn btn-sm btn-outline-primary rounded-pill px-2.5 py-0.5" onclick="addAnnouncementRow()">
-          <i data-lucide="plus" style="width:0.85rem; height:0.85rem;"></i> 新增公告
-        </button>
-      </div>
-      <div class="card-body p-3">
-        <div id="announcementEditList" class="d-flex flex-column gap-2"></div>
-      </div>
-    </div>
 
     <div class="row g-4">
       <!-- 左側：待還總金額 & 新增紀錄 -->
@@ -364,9 +457,15 @@
         <div class="d-flex flex-column gap-3 sticky-lg-top" style="top: 1.5rem; z-index: 10;">
           <div class="card slate-card hero-card p-3">
             <div class="card-body">
-              <div class="d-flex align-items-center gap-2 mb-2">
-                <i data-lucide="wallet" class="text-primary"></i>
-                <span class="text-sub">目前待還總金額</span>
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <div class="d-flex align-items-center gap-2">
+                  <i data-lucide="wallet" class="text-primary"></i>
+                  <span class="text-sub">目前待還總金額</span>
+                </div>
+                <!-- 催帳圖卡生成按鈕 -->
+                <button class="btn btn-sm btn-outline-danger rounded-pill px-2.5 py-1 d-flex align-items-center gap-1 shadow-sm" onclick="showDebtReminderCardModal()" title="點擊生成 1:1 催帳圖卡">
+                  <i data-lucide="image" style="width: 0.9rem; height: 0.9rem;"></i> <span class="small fw-semibold">催帳圖卡</span>
+                </button>
               </div>
               <h2 class="display-6 fw-bold mb-0 hero-amount" id="totalOwed">NT$ --</h2>
             </div>
@@ -417,7 +516,7 @@
                     <input type="text" class="form-control rounded-3" id="note" placeholder="例如：午餐、飲料、轉帳">
                   </div>
                   <div class="col-12 pt-2">
-                    <button type="submit" class="btn btn-slate-primary w-100 py-2.5 rounded-3 d-flex align-items-center justify-content-center gap-2" id="submitBtn">
+                    <button type="submit" class="btn btn-slate-primary w-100 py-2.5 rounded-3 d-flex align-items-center justify-content-center gap-2 shadow-sm" id="submitBtn">
                       <i data-lucide="send"></i> 送出紀錄
                     </button>
                     <div id="submitAlert" class="alert alert-success mt-2 mb-0 py-2 px-3 text-center rounded-3 d-none fade" role="alert" style="font-size: 0.9rem;">
@@ -431,7 +530,6 @@
         </div>
       </div>
 
-      <!-- 右側：歷史紀錄清單 -->
       <div class="col-12 col-lg-7">
         <div class="card slate-card">
           <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0 d-flex align-items-center justify-content-between flex-wrap gap-2">
@@ -474,7 +572,7 @@
           <li><a class="dropdown-item" href="#" onclick="changeTheme('auto'); return false;"><i data-lucide="monitor" class="me-2"></i>隨系統切換</a></li>
         </ul>
       </div>
-      <div class="text-sub opacity-75">Copyright © 2026 帳務管理系統v5.3 by Dinher</div>
+      <div class="text-sub opacity-75">Copyright © 2026 帳務管理系統v5.7 by Dinher</div>
     </div>
   </footer>
 
@@ -493,7 +591,7 @@
     let tableSortKey = 'date';
     let tableSortOrder = 'desc';
     
-    // 🔐 管理員權限狀態
+    // 🔐 管理員權限與暫存異動狀態
     let adminPassword = localStorage.getItem('admin_pwd') || null;
     let isLoggedIn = !!adminPassword;
     let pendingChanges = new Map();
@@ -523,7 +621,6 @@
       }
     }
 
-    // 🎨 主題切換
     const systemThemeMedia = window.matchMedia('(prefers-color-scheme: dark)');
     systemThemeMedia.addEventListener('change', () => {
       if (localStorage.getItem('user-theme') === 'auto') {
@@ -555,34 +652,55 @@
 
     applyTheme(localStorage.getItem('user-theme') || 'auto');
 
-    // 🔐 登入/登出 UI 切換
+    function getSwalStyle() {
+      const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+      return {
+        background: isDark ? '#1e1e1e' : '#ffffff',
+        color: isDark ? '#f1f5f9' : '#0f172a',
+        popupClass: 'swal2-popup-custom'
+      };
+    }
+
     function updateAuthUI() {
       const authBtn = document.getElementById('authBtn');
       const saveBtn = document.getElementById('saveChangesBtn');
-      const annCard = document.getElementById('announcementEditorCard');
+      const annMgmtBtn = document.getElementById('announcementMgmtBtn');
 
       if (isLoggedIn) {
-        authBtn.className = "btn btn-sm btn-outline-danger rounded-pill px-3 py-1.5 d-flex align-items-center gap-1.5";
+        authBtn.className = "btn btn-sm btn-outline-danger rounded-pill px-3 py-1.5 d-flex align-items-center gap-1.5 fw-medium";
         authBtn.innerHTML = `<i data-lucide="log-out" style="width:1rem; height:1rem;"></i> <span>登出管理員</span>`;
         
         saveBtn.classList.remove('d-none');
         saveBtn.classList.add('d-flex');
 
-        annCard.classList.remove('d-none');
+        annMgmtBtn.classList.remove('d-none');
+        annMgmtBtn.classList.add('d-flex');
       } else {
-        authBtn.className = "btn btn-sm btn-outline-primary rounded-pill px-3 py-1.5 d-flex align-items-center gap-1.5";
+        authBtn.className = "btn btn-sm btn-outline-primary rounded-pill px-3 py-1.5 d-flex align-items-center gap-1.5 fw-medium";
         authBtn.innerHTML = `<i data-lucide="lock" style="width:1rem; height:1rem;"></i> <span>管理員登入</span>`;
         
         saveBtn.classList.add('d-none');
         saveBtn.classList.remove('d-flex');
 
-        annCard.classList.add('d-none');
+        annMgmtBtn.classList.add('d-none');
+        annMgmtBtn.classList.remove('d-flex');
       }
       
+      updatePendingBadge();
       refreshIcons();
       renderAnnouncements();
-      renderAnnouncementEditor();
       renderHistoryList();
+    }
+
+    function updatePendingBadge() {
+      const badge = document.getElementById('pendingChangesBadge');
+      const count = pendingChanges.size;
+      if (count > 0 && isLoggedIn) {
+        badge.innerText = count;
+        badge.classList.remove('d-none');
+      } else {
+        badge.classList.add('d-none');
+      }
     }
 
     async function handleAuthAction() {
@@ -600,7 +718,8 @@
           timer: 1200,
           showConfirmButton: false,
           background: swalStyle.background,
-          color: swalStyle.color
+          color: swalStyle.color,
+          customClass: { popup: swalStyle.popupClass }
         });
       } else {
         const pwd = await getPasswordAuthorization();
@@ -618,7 +737,8 @@
             timer: 1200,
             showConfirmButton: false,
             background: swalStyle.background,
-            color: swalStyle.color
+            color: swalStyle.color,
+            customClass: { popup: swalStyle.popupClass }
           });
         }
       }
@@ -660,6 +780,200 @@
       document.getElementById('recordCount').innerText = `${globalHistoryData.length} 筆紀錄`;
     }
 
+    function renderHistoryList() {
+      const container = document.getElementById('monthlyHistoryAccordion');
+      if (!container) return;
+
+      if (!globalHistoryData || globalHistoryData.length === 0) {
+        container.innerHTML = `<div class="text-center text-sub py-5">尚無歷史紀錄</div>`;
+        return;
+      }
+
+      // 附帶原始索引號
+      const itemsWithIndex = globalHistoryData.map((item, idx) => ({ ...item, origIndex: idx }));
+
+      // 依月份 (YYYY-MM) 分組
+      const groups = {};
+      itemsWithIndex.forEach(item => {
+        let monthKey = '其他';
+        if (item.date && item.date.length >= 7) {
+          monthKey = item.date.substring(0, 7);
+        }
+        if (!groups[monthKey]) groups[monthKey] = [];
+        groups[monthKey].push(item);
+      });
+
+      // 依目前設定排序月份鍵
+      const sortedMonthKeys = Object.keys(groups).sort((a, b) => {
+        if (a === '其他') return 1;
+        if (b === '其他') return -1;
+        return currentSortOrder === 'desc' ? b.localeCompare(a) : a.localeCompare(b);
+      });
+
+      let accordionHtml = '';
+
+      sortedMonthKeys.forEach((monthKey, monthIdx) => {
+        const monthItems = groups[monthKey];
+
+        // 組內欄位排序
+        monthItems.sort((a, b) => {
+          let valA = a[tableSortKey];
+          let valB = b[tableSortKey];
+          if (tableSortKey === 'amount') {
+            valA = Number(valA) || 0;
+            valB = Number(valB) || 0;
+          } else {
+            valA = String(valA || '');
+            valB = String(valB || '');
+          }
+          if (valA < valB) return tableSortOrder === 'asc' ? -1 : 1;
+          if (valA > valB) return tableSortOrder === 'asc' ? 1 : -1;
+          return 0;
+        });
+
+        // 計算月度小計：借錢增加, 還錢減少
+        let subtotal = 0;
+        monthItems.forEach(item => {
+          const amt = Number(item.amount) || 0;
+          if (item.type === '還錢') {
+            subtotal -= amt;
+          } else {
+            subtotal += amt;
+          }
+        });
+
+        let displayMonthTitle = monthKey;
+        if (monthKey !== '力他' && monthKey !== '其他') {
+          const [year, month] = monthKey.split('-');
+          displayMonthTitle = `${year} 年 ${month} 月`;
+        }
+
+        // 月總結 +/- 格式 (改用系統專用的 amount-lend 與 amount-repay 類別)
+        let subtotalBadge = '';
+        if (subtotal > 0) {
+          subtotalBadge = `<span class="small fw-bold amount-lend">+NT$ ${subtotal.toLocaleString()}</span>`;
+        } else if (subtotal < 0) {
+          subtotalBadge = `<span class="small fw-bold amount-repay">-NT$ ${Math.abs(subtotal).toLocaleString()}</span>`;
+        } else {
+          subtotalBadge = `<span class="small fw-semibold text-sub">NT$ 0</span>`;
+        }
+
+        const collapseId = `collapseMonth_${monthIdx}`;
+        const headingId = `headingMonth_${monthIdx}`;
+        const isOpen = monthIdx === 0;
+
+        let rowsHtml = '';
+        monthItems.forEach(item => {
+          const pending = pendingChanges.get(item.origIndex);
+          let rowClass = '';
+          let isDeleted = false;
+
+          if (pending) {
+            if (pending.action === 'delete') {
+              rowClass = 'edit-row-deleted';
+              isDeleted = true;
+            } else if (pending.action === 'edit') {
+              rowClass = 'edit-row-modified';
+            }
+          }
+
+          const amtVal = Number(item.amount) || 0;
+
+          if (isLoggedIn) {
+            const selectColorClass = item.type === '還錢' ? 'edit-type-repay' : 'edit-type-lend';
+
+            rowsHtml += `
+              <tr class="${rowClass}">
+                <td style="min-width: 130px;">
+                  <input type="date" class="form-control form-control-sm edit-input-stylish" value="${item.date || ''}" ${isDeleted ? 'disabled' : ''} onchange="handleInputChange(${item.origIndex}, 'date', this.value, this)">
+                </td>
+                <td style="min-width: 100px;">
+                  <select class="form-select form-select-sm edit-input-stylish ${selectColorClass}" style="padding-right: 1.8rem;" ${isDeleted ? 'disabled' : ''} onchange="handleInputChange(${item.origIndex}, 'type', this.value, this)">
+                    <option value="借錢" class="text-danger fw-bold" ${item.type === '借錢' ? 'selected' : ''}>借錢</option>
+                    <option value="還錢" class="text-success fw-bold" ${item.type === '還錢' ? 'selected' : ''}>還錢</option>
+                  </select>
+                </td>
+                <td style="min-width: 110px;">
+                  <input type="number" class="form-control form-control-sm edit-input-stylish" value="${amtVal || ''}" min="0" ${isDeleted ? 'disabled' : ''} onchange="handleInputChange(${item.origIndex}, 'amount', this.value, this)">
+                </td>
+                <td>
+                  <input type="text" class="form-control form-control-sm edit-input-stylish edit-note-input" value="${item.note || ''}" placeholder="無" ${isDeleted ? 'disabled' : ''} onchange="handleInputChange(${item.origIndex}, 'note', this.value, this)">
+                </td>
+                <td class="text-center" style="width: 50px;">
+                  <div class="action-btn-group">
+                    ${isDeleted ? `
+                      <button class="btn btn-action-icon btn-outline-secondary" onclick="togglePendingDelete(${item.origIndex}, this)" title="復原刪除">
+                        <i data-lucide="rotate-ccw" style="width:0.9rem;height:0.9rem;"></i>
+                      </button>
+                    ` : `
+                      <button class="btn btn-action-icon btn-outline-danger" onclick="togglePendingDelete(${item.origIndex}, this)" title="標記刪除">
+                        <i data-lucide="trash-2" style="width:0.9rem;height:0.9rem;"></i>
+                      </button>
+                    `}
+                  </div>
+                </td>
+              </tr>
+            `;
+          } else {
+            const typeBadge = item.type === '還錢' ? '<span class="badge-repay">還錢</span>' : '<span class="badge-lend">借錢</span>';
+            const amtClass = item.type === '還錢' ? 'amount-repay' : 'amount-lend';
+            const noteText = item.note ? item.note : '<span class="text-sub opacity-50 small">無</span>';
+
+            rowsHtml += `
+              <tr>
+                <td class="fw-medium">${item.date || ''}</td>
+                <td>${typeBadge}</td>
+                <td class="${amtClass}">NT$ ${amtVal.toLocaleString()}</td>
+                <td>${noteText}</td>
+              </tr>
+            `;
+          }
+        });
+
+        accordionHtml += `
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="${headingId}">
+              <button class="accordion-button ${isOpen ? '' : 'collapsed'}" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}">
+                <div class="d-flex align-items-center justify-content-between w-100 me-3">
+                  <span class="fw-bold d-flex align-items-center gap-1.5">
+                    <i data-lucide="calendar" class="text-primary" style="width:1.1rem; height:1.1rem;"></i>
+                    ${displayMonthTitle}
+                  </span>
+                  <div class="d-flex align-items-center gap-3">
+                    <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2.5 py-1 fw-normal small">${monthItems.length} 筆</span>
+                    ${subtotalBadge}
+                  </div>
+                </div>
+              </button>
+            </h2>
+            <div id="${collapseId}" class="accordion-collapse collapse ${isOpen ? 'show' : ''}" data-bs-parent="#monthlyHistoryAccordion">
+              <div class="accordion-body">
+                <div class="table-responsive">
+                  <table class="table table-custom align-middle text-nowrap">
+                    <thead>
+                      <tr>
+                        <th class="sortable ${tableSortKey === 'date' ? 'active' : ''}" onclick="handleTableSort('date')">日期 ${getSortIconHtml('date')}</th>
+                        <th class="sortable ${tableSortKey === 'type' ? 'active' : ''}" onclick="handleTableSort('type')">類型 ${getSortIconHtml('type')}</th>
+                        <th class="sortable ${tableSortKey === 'amount' ? 'active' : ''}" onclick="handleTableSort('amount')">金額 ${getSortIconHtml('amount')}</th>
+                        <th class="sortable ${tableSortKey === 'note' ? 'active' : ''}" onclick="handleTableSort('note')">備註 ${getSortIconHtml('note')}</th>
+                        ${isLoggedIn ? '<th class="text-center" style="width: 50px;">操作</th>' : ''}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${rowsHtml}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = accordionHtml;
+      refreshIcons();
+    }
+
     async function batchSyncChanges() {
       if (!isLoggedIn) return;
 
@@ -673,7 +987,8 @@
           timer: 1200,
           showConfirmButton: false,
           background: swalStyle.background,
-          color: swalStyle.color
+          color: swalStyle.color,
+          customClass: { popup: swalStyle.popupClass }
         });
         return;
       }
@@ -683,6 +998,7 @@
         html: `正在寫入 <b>${totalTasks}</b> 筆異動，請稍候...`,
         background: swalStyle.background,
         color: swalStyle.color,
+        customClass: { popup: swalStyle.popupClass },
         allowOutsideClick: false,
         didOpen: () => Swal.showLoading()
       });
@@ -737,7 +1053,8 @@
           timer: 1500,
           showConfirmButton: false,
           background: swalStyle.background,
-          color: swalStyle.color
+          color: swalStyle.color,
+          customClass: { popup: swalStyle.popupClass }
         });
 
       } catch (err) {
@@ -746,12 +1063,12 @@
           title: '同步失敗',
           text: err.message,
           background: swalStyle.background,
-          color: swalStyle.color
+          color: swalStyle.color,
+          customClass: { popup: swalStyle.popupClass }
         });
       }
     }
 
-    // 📢 渲染與編輯公告
     const alertIconMap = {
       info: 'info',
       warning: 'triangle-alert',
@@ -767,14 +1084,22 @@
         return;
       }
 
-      container.innerHTML = globalAnnouncements.map((item) => {
+      // 隱藏的公告在前台不渲染
+      const visibleAnnouncements = globalAnnouncements.filter(item => !item.hidden);
+
+      if (visibleAnnouncements.length === 0) {
+        container.innerHTML = '';
+        return;
+      }
+
+      container.innerHTML = visibleAnnouncements.map((item) => {
         const alertType = item.type || 'info';
         const iconName = alertIconMap[alertType] || 'megaphone';
 
         return `
           <div class="alert alert-${alertType} alert-dismissible fade show m-0 rounded-3 d-flex align-items-center gap-2 border-0 shadow-sm" role="alert">
             <i data-lucide="${iconName}" class="flex-shrink-0"></i>
-            <div class="flex-grow-1 fw-medium">${item.content}</div>
+            <div class="flex-grow-1 fw-medium" style="font-size: 0.95rem;">${item.content}</div>
           </div>
         `;
       }).join('');
@@ -782,251 +1107,7 @@
       refreshIcons();
     }
 
-    // ✏️ 渲染公告編輯器 (管理員專用)
-    function renderAnnouncementEditor() {
-      if (!isLoggedIn) return;
-
-      const editList = document.getElementById('announcementEditList');
-      if (!globalAnnouncements || globalAnnouncements.length === 0) {
-        editList.innerHTML = `<div class="text-sub small text-center py-2">目前尚無公告，可點選上方「新增公告」</div>`;
-        return;
-      }
-
-      editList.innerHTML = globalAnnouncements.map((item, idx) => `
-        <div class="d-flex align-items-center gap-2">
-          <input type="text" class="form-control form-control-sm rounded-2 flex-grow-1" 
-                 value="${item.content || ''}" 
-                 placeholder="公告內容" 
-                 onchange="updateAnnouncementItem(${idx}, 'content', this.value)">
-                 
-          <select class="form-select form-select-sm rounded-2" style="width: 100px;" 
-                  onchange="updateAnnouncementItem(${idx}, 'type', this.value)">
-            <option value="info" ${item.type === 'info' ? 'selected' : ''}>提示 (藍)</option>
-            <option value="warning" ${item.type === 'warning' ? 'selected' : ''}>警告 (黃)</option>
-            <option value="danger" ${item.type === 'danger' ? 'selected' : ''}>緊急 (紅)</option>
-            <option value="success" ${item.type === 'success' ? 'selected' : ''}>成功 (綠)</option>
-          </select>
-
-          <button class="btn btn-sm btn-link text-danger p-0 ms-1" onclick="deleteAnnouncementItem(${idx})" title="刪除公告">
-            <i data-lucide="trash-2" style="width:1rem;height:1rem;"></i>
-          </button>
-        </div>
-      `).join('');
-
-      refreshIcons();
-    }
-
-    function updateAnnouncementItem(index, field, value) {
-      if (globalAnnouncements[index]) {
-        globalAnnouncements[index][field] = value;
-        renderAnnouncements();
-      }
-    }
-
-    function addAnnouncementRow() {
-      globalAnnouncements.push({ content: "新公告內容", type: "info" });
-      renderAnnouncements();
-      renderAnnouncementEditor();
-    }
-
-    function deleteAnnouncementItem(index) {
-      globalAnnouncements.splice(index, 1);
-      renderAnnouncements();
-      renderAnnouncementEditor();
-    }
-
-    // 📜 渲染歷史紀錄清單
-    function renderHistoryList() {
-      const accordionContainer = document.getElementById('monthlyHistoryAccordion');
-
-      const openCollapseIds = new Set();
-      document.querySelectorAll('#monthlyHistoryAccordion .accordion-collapse.show').forEach(el => {
-        openCollapseIds.add(el.id);
-      });
-
-      if (!globalHistoryData || globalHistoryData.length === 0) {
-        accordionContainer.innerHTML = `<div class="text-center text-sub py-5">目前尚無任何借還記錄</div>`;
-        return;
-      }
-
-      const groups = {};
-      globalHistoryData.forEach((item, index) => {
-        item._originalIndex = index;
-        const monthKey = item.date ? item.date.substring(0, 7) : '未知月份';
-        if (!groups[monthKey]) {
-          groups[monthKey] = [];
-        }
-        groups[monthKey].push(item);
-      });
-
-      const sortedMonthKeys = Object.keys(groups).sort((a, b) => {
-        return currentSortOrder === 'desc' ? b.localeCompare(a) : a.localeCompare(b);
-      });
-
-      accordionContainer.innerHTML = sortedMonthKeys.map((monthKey, index) => {
-        const monthItems = groups[monthKey];
-
-        monthItems.sort((a, b) => {
-          let valA = a[tableSortKey];
-          let valB = b[tableSortKey];
-
-          if (tableSortKey === 'amount') {
-            valA = Number(valA) || 0;
-            valB = Number(valB) || 0;
-          } else {
-            valA = String(valA || '');
-            valB = String(valB || '');
-          }
-
-          if (valA < valB) return tableSortOrder === 'asc' ? -1 : 1;
-          if (valA > valB) return tableSortOrder === 'asc' ? 1 : -1;
-          return 0;
-        });
-
-        let monthBorrowTotal = 0;
-        let monthRepayTotal = 0;
-
-        monthItems.forEach(item => {
-          const amt = Number(item.amount) || 0;
-          if (item.type === '借錢') monthBorrowTotal += amt;
-          if (item.type === '還錢') monthRepayTotal += amt;
-        });
-
-        const netChange = monthBorrowTotal - monthRepayTotal;
-        const collapseId = `collapse-${monthKey.replace('-', '')}`;
-        const headingId = `heading-${monthKey.replace('-', '')}`;
-
-        const isShow = openCollapseIds.size > 0 
-          ? openCollapseIds.has(collapseId) 
-          : (index === 0);
-
-        const [year, month] = monthKey.split('-');
-        const formattedMonthLabel = year && month ? `${year} 年 ${month} 月` : monthKey;
-
-        const tableRows = monthItems.map(item => {
-          const origIdx = item._originalIndex;
-          const isBorrow = item.type === '借錢';
-          const amt = Number(item.amount) || 0;
-          const formattedAmt = `${isBorrow ? '+' : '-'} NT$ ${amt.toLocaleString()}`;
-          const isPendingDeleted = pendingChanges.get(origIdx)?.action === 'delete';
-
-          // ✏️ 登入後：顯示無黑框、透明感的編輯欄位
-          if (isLoggedIn) {
-            return `
-              <tr class="${isPendingDeleted ? 'pending-deleted' : ''}">
-                <td style="width: 135px;" class="text-center">
-                  <input type="date" class="form-control edit-input-clean text-center" 
-                         value="${item.date}" 
-                         onchange="handleInputChange(${origIdx}, 'date', this.value)" 
-                         ${isPendingDeleted ? 'disabled' : ''}>
-                </td>
-                <td style="width: 110px;" class="text-center">
-                  <select class="form-select edit-input-clean text-center fw-bold ${isBorrow ? 'text-danger' : 'text-success'}" 
-                          onchange="handleInputChange(${origIdx}, 'type', this.value)"
-                          ${isPendingDeleted ? 'disabled' : ''}>
-                    <option value="借錢" class="text-danger fw-bold" ${item.type === '借錢' ? 'selected' : ''}>借錢</option>
-                    <option value="還錢" class="text-success fw-bold" ${item.type === '還錢' ? 'selected' : ''}>還錢</option>
-                  </select>
-                </td>
-                <td style="width: 135px;" class="text-center">
-                  <input type="number" class="form-control edit-input-clean text-center fw-bold ${isBorrow ? 'text-danger' : 'text-success'}" 
-                         value="${amt}" min="1" 
-                         onchange="handleInputChange(${origIdx}, 'amount', this.value)" 
-                         ${isPendingDeleted ? 'disabled' : ''}>
-                </td>
-                <td class="text-start">
-                  <input type="text" class="form-control edit-input-clean edit-note-input" 
-                         value="${item.note || ''}" placeholder="備註說明" 
-                         onchange="handleInputChange(${origIdx}, 'note', this.value)" 
-                         ${isPendingDeleted ? 'disabled' : ''}>
-                </td>
-                <td class="text-center" style="min-width: 70px;">
-                  <button class="btn btn-sm btn-link ${isPendingDeleted ? 'text-secondary' : 'text-danger'} p-0" 
-                          title="${isPendingDeleted ? '復原刪除' : '標記刪除'}" 
-                          onclick="togglePendingDelete(${origIdx})">
-                    <i data-lucide="${isPendingDeleted ? 'rotate-ccw' : 'trash-2'}" style="width:1rem;height:1rem;"></i>
-                  </button>
-                </td>
-              </tr>
-            `;
-          }
-
-          // 👁️ 未登入：一般檢視
-          return `
-            <tr>
-              <td class="text-nowrap text-sub text-center" style="width: 25%; font-size:0.9rem;">${item.date}</td>
-              <td class="text-nowrap text-center" style="width: 20%;">
-                <span class="${isBorrow ? 'badge-lend' : 'badge-repay'} fs-7">
-                  ${item.type}
-                </span>
-              </td>
-              <td class="${isBorrow ? 'amount-lend' : 'amount-repay'} text-nowrap text-center" style="width: 25%;">
-                ${formattedAmt}
-              </td>
-              <td class="text-sub text-nowrap text-start" style="width: 30%; font-size:0.9rem;">${item.note || ''}</td>
-            </tr>
-          `;
-        }).join('');
-
-        return `
-          <div class="accordion-item">
-            <h2 class="accordion-header" id="${headingId}">
-              <button class="accordion-button ${isShow ? '' : 'collapsed'} d-flex align-items-center justify-content-between pe-4" 
-                      type="button" 
-                      data-bs-toggle="collapse" 
-                      data-bs-target="#${collapseId}" 
-                      aria-expanded="${isShow ? 'true' : 'false'}" 
-                      aria-controls="${collapseId}">
-                <div class="d-flex align-items-center gap-2 flex-grow-1 me-2">
-                  <i data-lucide="calendar" class="text-primary"></i>
-                  <span class="fw-bold">${formattedMonthLabel}</span>
-                  <span class="badge bg-secondary-subtle text-secondary rounded-pill small ms-1">${monthItems.length} 筆</span>
-                </div>
-                
-                <div class="text-end me-2" style="font-size:0.9rem;">
-                  <span class="text-sub d-none d-sm-inline">當月淨變動：</span>
-                  <span class="fw-bold ${netChange > 0 ? 'amount-lend' : (netChange < 0 ? 'amount-repay' : 'text-sub')}">
-                    ${netChange > 0 ? '+' : ''}${netChange.toLocaleString()}
-                  </span>
-                </div>
-              </button>
-            </h2>
-            <div id="${collapseId}" 
-                 class="accordion-collapse collapse ${isShow ? 'show' : ''}" 
-                 aria-labelledby="${headingId}">
-              <div class="accordion-body">
-                <div class="table-responsive">
-                  <table class="table table-custom align-middle">
-                    <thead>
-                      <tr>
-                        <th class="sortable text-nowrap text-center ${tableSortKey === 'date' ? 'active' : ''}" style="min-width: 125px;" onclick="handleTableSort('date')">
-                          日期 ${getSortIconHtml('date')}
-                        </th>
-                        <th class="sortable text-nowrap text-center ${tableSortKey === 'type' ? 'active' : ''}" style="min-width: 100px;" onclick="handleTableSort('type')">
-                          類型 ${getSortIconHtml('type')}
-                        </th>
-                        <th class="sortable text-nowrap text-center ${tableSortKey === 'amount' ? 'active' : ''}" style="min-width: 125px;" onclick="handleTableSort('amount')">
-                          金額 ${getSortIconHtml('amount')}
-                        </th>
-                        <th class="text-sub text-nowrap text-start">備註</th>
-                        ${isLoggedIn ? '<th style="width: 40px;" class="text-center">操作</th>' : ''}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      ${tableRows}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      refreshIcons();
-    }
-
-    function handleInputChange(index, field, value) {
+    function handleInputChange(index, field, value, targetEl = null) {
       if (!isLoggedIn) return;
 
       const record = globalHistoryData[index];
@@ -1042,31 +1123,391 @@
         currentPending.record[field] = val;
         pendingChanges.set(index, currentPending);
       }
+
+      updatePendingBadge();
+
+      if (targetEl) {
+        if (field === 'type') {
+          if (val === '還錢') {
+            targetEl.className = "form-select form-select-sm edit-input-stylish edit-type-repay";
+          } else {
+            targetEl.className = "form-select form-select-sm edit-input-stylish edit-type-lend";
+          }
+        }
+
+        const tr = targetEl.closest('tr');
+        if (tr && !tr.classList.contains('edit-row-deleted')) {
+          tr.classList.add('edit-row-modified');
+        }
+      }
     }
 
-    function togglePendingDelete(index) {
+    function togglePendingDelete(index, btnEl = null) {
       const currentPending = pendingChanges.get(index);
+      const isDeleting = !(currentPending && currentPending.action === 'delete');
 
-      if (currentPending && currentPending.action === 'delete') {
+      if (!isDeleting) {
         pendingChanges.delete(index);
       } else {
         pendingChanges.set(index, { action: 'delete' });
       }
-      renderHistoryList();
+
+      updatePendingBadge();
+
+      if (btnEl) {
+        const tr = btnEl.closest('tr');
+        if (tr) {
+          if (isDeleting) {
+            tr.classList.remove('edit-row-modified');
+            tr.classList.add('edit-row-deleted');
+            tr.querySelectorAll('input, select').forEach(el => el.disabled = true);
+            btnEl.setAttribute('title', '復原刪除');
+            btnEl.className = 'btn btn-action-icon btn-outline-secondary';
+            btnEl.innerHTML = `<i data-lucide="rotate-ccw" style="width:0.9rem;height:0.9rem;"></i>`;
+          } else {
+            tr.classList.remove('edit-row-deleted');
+            const isModified = pendingChanges.has(index);
+            if (isModified) tr.classList.add('edit-row-modified');
+            tr.querySelectorAll('input, select').forEach(el => el.disabled = false);
+            btnEl.setAttribute('title', '標記刪除');
+            btnEl.className = 'btn btn-action-icon btn-outline-danger';
+            btnEl.innerHTML = `<i data-lucide="trash-2" style="width:0.9rem;height:0.9rem;"></i>`;
+          }
+          refreshIcons();
+        }
+      } else {
+        renderHistoryList();
+      }
+    }
+
+    let draggedAnnIndex = null;
+
+    async function openAnnouncementSwal() {
+      if (!isLoggedIn) return;
+      const swalStyle = getSwalStyle();
+
+      let localAnnouncements = JSON.parse(JSON.stringify(globalAnnouncements || []));
+
+      const renderSwalItemsHtml = () => {
+        if (localAnnouncements.length === 0) {
+          return `<div class="text-center text-muted py-4 fs-6">目前無公告事項</div>`;
+        }
+        return localAnnouncements.map((item, i) => `
+          <div class="announcement-swal-item d-flex align-items-center gap-2 ${item.hidden ? 'is-hidden' : ''}" data-index="${i}">
+            <input type="text" class="form-control form-control-md bg-transparent text-primary fw-medium px-3 py-2 fs-6 flex-grow-1" value="${item.content || ''}" placeholder="請輸入公告內容..." oninput="updateSwalAnnItem(${i}, 'content', this.value)">
+            
+            <select class="form-select form-select-md bg-transparent text-primary px-2 py-2" style="width: 110px;" onchange="updateSwalAnnItem(${i}, 'type', this.value)">
+              <option value="info" ${item.type === 'info' ? 'selected' : ''}>提示 (藍)</option>
+              <option value="warning" ${item.type === 'warning' ? 'selected' : ''}>警告 (黃)</option>
+              <option value="danger" ${item.type === 'danger' ? 'selected' : ''}>緊急 (紅)</option>
+              <option value="success" ${item.type === 'success' ? 'selected' : ''}>成功 (綠)</option>
+            </select>
+
+            <button class="btn btn-sm ${item.hidden ? 'btn-outline-secondary' : 'btn-outline-primary'} p-2 border-0" onclick="toggleSwalAnnHidden(${i})" title="${item.hidden ? '顯示此公告' : '隱藏此公告'}">
+              <i data-lucide="${item.hidden ? 'eye-off' : 'eye'}" style="width:1.1rem;height:1.1rem;"></i>
+            </button>
+
+            <button class="btn btn-sm btn-outline-danger p-2 border-0" onclick="removeSwalAnnItem(${i})" title="刪除公告">
+              <i data-lucide="trash-2" style="width:1.1rem;height:1.1rem;"></i>
+            </button>
+
+            <!-- 右側拖曳握把 -->
+            <span class="drag-handle text-muted px-2 ms-1" draggable="true" title="按住圖示拖曳排序">
+              <i data-lucide="grip-vertical" style="width:1.25rem;height:1.25rem;"></i>
+            </span>
+          </div>
+        `).join('');
+      };
+
+      window.updateSwalAnnItem = (index, field, value) => {
+        if (localAnnouncements[index]) {
+          localAnnouncements[index][field] = value;
+        }
+      };
+
+      window.toggleSwalAnnHidden = (index) => {
+        if (localAnnouncements[index]) {
+          localAnnouncements[index].hidden = !localAnnouncements[index].hidden;
+          const container = document.getElementById('swalAnnList');
+          if (container) {
+            container.innerHTML = renderSwalItemsHtml();
+            attachDragEvents();
+            refreshIcons();
+          }
+        }
+      };
+
+      window.removeSwalAnnItem = (index) => {
+        localAnnouncements.splice(index, 1);
+        const container = document.getElementById('swalAnnList');
+        if (container) {
+          container.innerHTML = renderSwalItemsHtml();
+          attachDragEvents();
+          refreshIcons();
+        }
+      };
+
+      window.addSwalAnnItem = () => {
+        localAnnouncements.push({ content: '', type: 'info', hidden: false });
+        const container = document.getElementById('swalAnnList');
+        if (container) {
+          container.innerHTML = renderSwalItemsHtml();
+          attachDragEvents();
+          refreshIcons();
+          // 自動將捲軸拉到最下方
+          container.scrollTop = container.scrollHeight;
+        }
+      };
+
+      function attachDragEvents() {
+        const container = document.getElementById('swalAnnList');
+        if (!container) return;
+
+        const handles = container.querySelectorAll('.drag-handle');
+        handles.forEach((handle) => {
+          const itemRow = handle.closest('.announcement-swal-item');
+          if (!itemRow) return;
+
+          handle.addEventListener('dragstart', (e) => {
+            draggedAnnIndex = parseInt(itemRow.getAttribute('data-index'));
+            itemRow.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+          });
+
+          handle.addEventListener('dragend', () => {
+            itemRow.classList.remove('dragging');
+            draggedAnnIndex = null;
+          });
+        });
+
+        const rows = container.querySelectorAll('.announcement-swal-item');
+        rows.forEach((row) => {
+          row.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+          });
+
+          row.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const targetIndex = parseInt(row.getAttribute('data-index'));
+
+            if (draggedAnnIndex !== null && draggedAnnIndex !== targetIndex) {
+              const movedItem = localAnnouncements.splice(draggedAnnIndex, 1)[0];
+              localAnnouncements.splice(targetIndex, 0, movedItem);
+
+              container.innerHTML = renderSwalItemsHtml();
+              attachDragEvents();
+              refreshIcons();
+            }
+          });
+        });
+      }
+
+      const result = await Swal.fire({
+        title: '<div class="d-flex align-items-center justify-content-center gap-2"><i data-lucide="megaphone" class="text-primary"></i> 公告事項管理</div>',
+        html: `
+          <div class="text-start mb-3">
+            <button class="btn btn-primary rounded-pill px-3.5 py-1.5 fw-medium d-inline-flex align-items-center gap-1.5" onclick="addSwalAnnItem()">
+              <i data-lucide="plus" style="width:1rem;height:1rem;"></i> 新增公告
+            </button>
+            <span class="text-sub ms-2 small">提示：按住右側 <i data-lucide="grip-vertical" style="width:0.9rem;height:0.9rem;"></i> 圖示可進行上下拖曳排序</span>
+          </div>
+          <div id="swalAnnList" class="text-start style-scrollbar" style="max-height: 420px; overflow-y: auto; padding-right: 4px;">
+            ${renderSwalItemsHtml()}
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: '儲存公告變更',
+        cancelButtonText: '取消',
+        confirmButtonColor: '#2563eb',
+        background: swalStyle.background,
+        color: swalStyle.color,
+        customClass: { popup: `${swalStyle.popupClass} swal-wide-popup` },
+        didOpen: () => {
+          attachDragEvents();
+          refreshIcons();
+        }
+      });
+
+      if (result.isConfirmed) {
+        globalAnnouncements = localAnnouncements.filter(a => a.content && a.content.trim() !== '');
+        renderAnnouncements();
+
+        try {
+          Swal.fire({
+            title: '儲存公告中...',
+            background: swalStyle.background,
+            color: swalStyle.color,
+            didOpen: () => Swal.showLoading()
+          });
+
+          const res = await fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+              sheet: currentSheetName,
+              password: adminPassword,
+              action: 'updateAnnouncements',
+              announcements: globalAnnouncements
+            })
+          });
+          const resData = await res.json();
+
+          if (resData.status === 'success') {
+            Swal.fire({
+              icon: 'success',
+              title: '公告已更新',
+              timer: 1200,
+              showConfirmButton: false,
+              background: swalStyle.background,
+              color: swalStyle.color,
+              customClass: { popup: swalStyle.popupClass }
+            });
+          } else {
+            throw new Error(resData.message || '更新失敗');
+          }
+        } catch (err) {
+          Swal.fire({
+            icon: 'error',
+            title: '更新失敗',
+            text: err.message,
+            background: swalStyle.background,
+            color: swalStyle.color,
+            customClass: { popup: swalStyle.popupClass }
+          });
+        }
+      }
+    }
+
+    function generate1to1DebtCardCanvas(title, dateText, amountVal) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 1080;
+      canvas.height = 1080;
+      const ctx = canvas.getContext('2d');
+
+      // 背景漸層 (Dark Elegant Gradient)
+      const grad = ctx.createLinearGradient(0, 0, 1080, 1080);
+      grad.addColorStop(0, '#0f172a');
+      grad.addColorStop(1, '#1e293b');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 1080, 1080);
+
+      // 圓角矩形繪製函式
+      function drawRoundedRect(x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.arcTo(x + w, y, x + w, y + h, r);
+        ctx.arcTo(x + w, y + h, x, y + h, r);
+        ctx.arcTo(x, y + h, x, y, r);
+        ctx.arcTo(x, y, x + w, y, r);
+        ctx.closePath();
+      }
+
+      // 外卡片區域
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
+      drawRoundedRect(70, 70, 940, 940, 48);
+      ctx.fill();
+
+      // 外框線條
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+      ctx.lineWidth = 3;
+      drawRoundedRect(70, 70, 940, 940, 48);
+      ctx.stroke();
+
+      // 頂部小標籤 Badge
+      ctx.fillStyle = 'rgba(239, 68, 68, 0.22)';
+      drawRoundedRect(420, 150, 240, 64, 32);
+      ctx.fill();
+
+      ctx.fillStyle = '#f87171';
+      ctx.font = 'bold 30px system-ui, -apple-system, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('帳務催繳通知', 540, 193);
+
+      // 主標題 (系統名稱)
+      ctx.fillStyle = '#f8fafc';
+      ctx.font = 'bold 46px system-ui, -apple-system, sans-serif';
+      ctx.fillText(title || '帳務管理系統', 540, 290);
+
+      // 分隔線 1
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(180, 340);
+      ctx.lineTo(900, 340);
+      ctx.stroke();
+
+      // 待還金額 Label
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '500 34px system-ui, -apple-system, sans-serif';
+      ctx.fillText('目前待結算金額', 540, 420);
+
+      // 金額大數字
+      ctx.fillStyle = '#ef4444';
+      ctx.font = 'bold 105px system-ui, -apple-system, sans-serif';
+      const formattedAmt = `NT$ ${amountVal.toLocaleString()}`;
+      ctx.fillText(formattedAmt, 540, 540);
+
+      // 分隔線 2
+      ctx.beginPath();
+      ctx.moveTo(180, 630);
+      ctx.lineTo(900, 630);
+      ctx.stroke();
+
+      // 結算日期
+      ctx.fillStyle = '#cbd5e1';
+      ctx.font = '36px system-ui, -apple-system, sans-serif';
+      ctx.fillText(`結算日期：${dateText}`, 540, 720);
+
+      // 自動抓取當前頁面網址並組合字串
+      const currentUrl = window.location.href;
+      // 繪製網址標示 (限制最大寬度為 960px，防止文字超出圖卡邊界)
+      ctx.fillStyle = '#475569'; // 可改為藍色 #3b82f6 或灰色 #64748b
+      ctx.font = '26px system-ui, -apple-system, sans-serif';
+      ctx.fillText('明細查詢請至', 540, 830, 960);
+      ctx.fillText( currentUrl, 540, 870, 960);
+
+      // 底部浮水印
+      ctx.fillStyle = '#475569';
+      ctx.font = '24px system-ui, -apple-system, sans-serif';
+      ctx.fillText('Copyright © 2026 帳務管理系統v5.7 by Dinher', 540, 970);
+
+      return canvas.toDataURL('image/png');
+    }
+
+    function showDebtReminderCardModal() {
+      const swalStyle = getSwalStyle();
+      const title = document.getElementById('appTitle').innerText || '帳務管理系統';
+      const todayStr = getLocalDateString();
+      const amountVal = currentTotalOwed || 0;
+
+      // 生成 1:1 Canvas Base64 圖片
+      const cardImgData = generate1to1DebtCardCanvas(title, todayStr, amountVal);
+
+      Swal.fire({
+        title: '<div class="d-flex align-items-center justify-content-center gap-2"><i data-lucide="image" class="text-danger"></i> 催帳圖卡</div>',
+        html: `
+          <div class="text-center my-2">
+            <img src="${cardImgData}" class="img-fluid rounded-4 shadow-sm border border-secondary border-opacity-25" style="max-width: 100%; height: auto; aspect-ratio: 1/1;" alt="催帳圖卡">
+          </div>
+          <div class="text-center text-sub small mt-3 opacity-75">
+            💡 長按上方圖片即可選擇「儲存圖片」或「複製」分享！
+          </div>
+        `,
+        confirmButtonText: '關閉',
+        confirmButtonColor: '#2563eb',
+        background: swalStyle.background,
+        color: swalStyle.color,
+        customClass: { popup: swalStyle.popupClass },
+        didOpen: () => {
+          refreshIcons();
+        }
+      });
     }
 
     function selectType(value, labelHtml) {
       document.getElementById('type').value = value;
       document.getElementById('typeDropdownLabel').innerHTML = labelHtml;
       refreshIcons();
-    }
-
-    function getSwalStyle() {
-      const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
-      return {
-        background: isDark ? '#121212' : '#ffffff',
-        color: isDark ? '#f1f5f9' : '#0f172a'
-      };
     }
 
     async function getPasswordAuthorization() {
@@ -1081,7 +1522,8 @@
         confirmButtonText: '登入',
         confirmButtonColor: '#2563eb',
         background: swalStyle.background,
-        color: swalStyle.color
+        color: swalStyle.color,
+        customClass: { popup: swalStyle.popupClass }
       });
 
       return password || null;
@@ -1208,7 +1650,8 @@
           title: '寫入失敗',
           text: '紀錄未成功寫入資料庫，請檢查網路連線。',
           background: swalStyle.background,
-          color: swalStyle.color
+          color: swalStyle.color,
+          customClass: { popup: swalStyle.popupClass }
         });
         await loadData(false);
       } finally {
