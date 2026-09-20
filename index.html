@@ -23,23 +23,21 @@
   <iframe id="gasFrame" allowfullscreen></iframe>
 
   <script>
-    // 1. 監聽來自 iframe (GAS) 的訊息
-    window.addEventListener('message', function(event) {
-      // 確保接收到的是設定標題的指令
-      if (event.data && event.data.type === 'setTitle' && event.data.title) {
-        document.title = event.data.title; // 改變 GitHub Pages 的分頁標題
-      }
-    });
+// 1. 監聽來自 iframe 的訊息
+  window.addEventListener('message', function(event) {
+    // 【加入這行來印出收到的資料】
+    console.log("收到來自 GAS 的訊息：", event.data);
 
-    // 2. 取得當前網址的 Query 參數（例如 ?load=pudding）
-    const queryString = window.location.search;
+    if (event.data && event.data.type === 'setTitle' && event.data.title) {
+      document.title = event.data.title;
+      console.log("分頁標題已成功更改為：", event.data.title);
+    }
+  });
 
-    // 3. 設定你的 GAS 基本網址
-    const gasBaseUrl = "https://script.google.com/macros/s/AKfycbxP0BpEun_t9OWNh0J0SrybPkkkb83a4QiKdEN6UHjwLziHjdwcQhGYAu0e67DCDdJt5w/exec";
-
-    // 4. 將參數串接上去，並指定給 iframe 的 src
-    const iframe = document.getElementById('gasFrame');
-    iframe.src = gasBaseUrl + queryString;
+  // 載入 iframe 邏輯...
+  const queryString = window.location.search;
+  const gasBaseUrl = "https://script.google.com/macros/s/AKfycbxP0BpEun_t9OWNh0J0SrybPkkkb83a4QiKdEN6UHjwLziHjdwcQhGYAu0e67DCDdJt5w/exec";
+  document.getElementById('gasFrame').src = gasBaseUrl + queryString;
   </script>
 </body>
 </html>
