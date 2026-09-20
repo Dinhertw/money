@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/png" href="https://dinhertw.github.io/money/icon.png">
-  <title>帳務管理系統</title>
+  <title>帳務管理系統</title> <!-- 預設標題 -->
   <style>
     body, html {
       margin: 0;
@@ -24,25 +23,23 @@
   <iframe id="gasFrame" allowfullscreen></iframe>
 
   <script>
-    // 1. 取得當前網址的 Query 參數（例如 ?load=pudding）
+    // 1. 監聽來自 iframe (GAS) 的訊息
+    window.addEventListener('message', function(event) {
+      // 確保接收到的是設定標題的指令
+      if (event.data && event.data.type === 'setTitle' && event.data.title) {
+        document.title = event.data.title; // 改變 GitHub Pages 的分頁標題
+      }
+    });
+
+    // 2. 取得當前網址的 Query 參數（例如 ?load=pudding）
     const queryString = window.location.search;
 
-    // 2. 設定你的 GAS 基本網址
+    // 3. 設定你的 GAS 基本網址
     const gasBaseUrl = "https://script.google.com/macros/s/AKfycbxP0BpEun_t9OWNh0J0SrybPkkkb83a4QiKdEN6UHjwLziHjdwcQhGYAu0e67DCDdJt5w/exec";
 
-    // 3. 將參數串接上去，並指定給 iframe 的 src
+    // 4. 將參數串接上去，並指定給 iframe 的 src
     const iframe = document.getElementById('gasFrame');
     iframe.src = gasBaseUrl + queryString;
-
-
-
-
-    window.addEventListener('message', function(event) {
-    // 確保安全，可以檢查 origin（此處簡略），若收到設定標題的指令就更改
-    if (event.data && event.data.type === 'setTitle') {
-      document.title = event.data.title;
-    }
-  });
   </script>
 </body>
 </html>
