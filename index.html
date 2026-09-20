@@ -5,30 +5,66 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/png" href="https://dinhertw.github.io/money/icon.png">
   <title>帳務管理系統</title> <!-- 預設標題 -->
+  
   <style>
+    /* 預設先給予深色背景（或根據你的預設喜好），防止載入前閃白 */
+    :root {
+      --app-bg: #121212; /* 預設給暗色，或可依需求改為 #f8fafc */
+    }
+
     body, html {
       margin: 0;
       padding: 0;
       width: 100%;
       height: 100%;
       overflow: hidden; /* 避免出現雙重捲軸 */
+      background-color: var(--app-bg); /* 套用動態背景色 */
+      transition: background-color 0.3s ease;
     }
+    
     iframe {
       width: 100%;
       height: 100%;
       border: none;
+      background-color: transparent;
     }
   </style>
+
+  <script>
+    // 【防止閃白關鍵】：在網頁一載入（甚至在 HTML 渲染前）就先檢查主題偏好
+    (function() {
+      // 1. 嘗試從 localStorage 讀取 GAS 儲存的主題（通常 GAS 裡會用類似這類 key 儲存，如果你的 key 不同可以調整）
+      // 這裡假設可能存放在 localStorage 或預設跟隨系統
+      let isDark = false;
+      
+      // 檢查系統是不是暗色模式
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        isDark = true;
+      }
+
+      // 如果有存過自訂主題（假設你 GAS 內叫 theme 或 ledger_theme）
+      const savedTheme = localStorage.getItem('theme') || localStorage.getItem('ledger_theme');
+      if (savedTheme === 'dark') isDark = true;
+      if (savedTheme === 'light') isDark = false;
+
+      // 即時設定根目錄的背景變數
+      if (isDark) {
+        document.documentElement.style.setProperty('--app-bg', '#121212');
+      } else {
+        document.documentElement.style.setProperty('--app-bg', '#f8fafc');
+      }
+    })();
+  </script>
 </head>
 <body>
   <iframe id="gasFrame" allowfullscreen></iframe>
 
   <script>
     // 1. 取得當前網址的參數
-    const queryString = window.location.search; // 例如 ?load=pudding
+    const queryString = window.location.search;
     const gasBaseUrl = "https://script.google.com/macros/s/AKfycbxP0BpEun_t9OWNh0J0SrybPkkkb83a4QiKdEN6UHjwLziHjdwcQhGYAu0e67DCDdJt5w/exec";
-  
-    // 2. 如果有帶參數，可以額外發請求去抓取即時標題
+
+    // 2. 如果有帶參數，額外發請求去抓取即時標題
     if (queryString) {
       fetch(gasBaseUrl + queryString + "&get_title")
         .then(response => response.json())
@@ -39,7 +75,7 @@
         })
         .catch(err => console.log("取得標題失敗", err));
     }
-  
+
     // 3. 設定 iframe 載入帶有完整參數的網頁
     document.getElementById('gasFrame').src = gasBaseUrl + queryString;
   </script>
