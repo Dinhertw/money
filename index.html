@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="https://dinhertw.github.io/money/icon.png">
   <title>帳務管理系統</title> <!-- 預設標題 -->
   <style>
     body, html {
@@ -23,21 +24,24 @@
   <iframe id="gasFrame" allowfullscreen></iframe>
 
   <script>
-// 1. 監聽來自 iframe 的訊息
-  window.addEventListener('message', function(event) {
-    // 【加入這行來印出收到的資料】
-    console.log("收到來自 GAS 的訊息：", event.data);
-
-    if (event.data && event.data.type === 'setTitle' && event.data.title) {
-      document.title = event.data.title;
-      console.log("分頁標題已成功更改為：", event.data.title);
+    // 1. 取得當前網址的參數
+    const queryString = window.location.search; // 例如 ?load=pudding
+    const gasBaseUrl = "https://script.google.com/macros/s/AKfycbxP0BpEun_t9OWNh0J0SrybPkkkb83a4QiKdEN6UHjwLziHjdwcQhGYAu0e67DCDdJt5w/exec";
+  
+    // 2. 如果有帶參數，可以額外發請求去抓取即時標題
+    if (queryString) {
+      fetch(gasBaseUrl + queryString + "&get_title")
+        .then(response => response.json())
+        .then(data => {
+          if (data && data.title) {
+            document.title = data.title; // 動態將分頁標題改成試算表 A1 的標題
+          }
+        })
+        .catch(err => console.log("取得標題失敗", err));
     }
-  });
-
-  // 載入 iframe 邏輯...
-  const queryString = window.location.search;
-  const gasBaseUrl = "https://script.google.com/macros/s/AKfycbxP0BpEun_t9OWNh0J0SrybPkkkb83a4QiKdEN6UHjwLziHjdwcQhGYAu0e67DCDdJt5w/exec";
-  document.getElementById('gasFrame').src = gasBaseUrl + queryString;
+  
+    // 3. 設定 iframe 載入帶有完整參數的網頁
+    document.getElementById('gasFrame').src = gasBaseUrl + queryString;
   </script>
 </body>
 </html>
